@@ -1,0 +1,105 @@
+networks:
+  hathor:
+    driver: bridge
+    name: hathor
+services:
+  full-node:
+    image: hathornetwork/hathor-core
+    ports:
+      - "8080:8080"
+    volumes:
+      - ${PWD}/data:/data
+      - ${PWD}/localnet.yml:/app/localnet.yml:ro
+    environment:
+      - HATHOR_CONFIG_YAML=/app/localnet.yml
+      - HATHOR_DATA=/data
+      - HATHOR_LISTEN=tcp:40403
+      - HATHOR_STATUS=8080
+      - HATHOR_WALLET_INDEX=true
+      - HATHOR_CACHE=true
+      - HATHOR_CACHE_SIZE=100000
+      - HATHOR_ALLOW_MINING_WITHOUT_PEERS=true
+    networks:
+      hathor:
+        aliases:
+          - full-node
+    command: run_node
+    healthcheck:
+      test: ["CMD", "sh", "-c", "timeout 1 bash -c 'echo > /dev/tcp/localhost/8080'"]
+      start_period: 2s
+      timeout: 2s
+      retries: 10
+      interval: 2s
+  mining-server:
+    image: hathornetwork/tx-mining-service
+    depends_on:
+      full-node:
+        condition: service_healthy
+    ports:
+      - "9000:9000"
+      - "9080:9080"
+    networks:
+      hathor:
+        aliases:
+          - mining-server
+    command: >
+      --testnet
+      --address WiGFcSYHhfRqWJ7PXYvhjULXtXCYD1VFdS
+      --stratum-port 9000
+      --api-port 9080
+      http://full-node:8080
+    healthcheck:
+      test: ["CMD", "sh", "-c", "timeout 1 nc -z 0.0.0.0 9000 && timeout 1 nc -z 0.0.0.0 9080"]
+      start_period: 2s
+      timeout: 2s
+      retries: 10
+      interval: 2s
+  cpu-miner:
+    image: hathornetwork/cpuminer
+    depends_on:
+      mining-server:
+        condition: service_healthy
+    networks:
+      hathor:
+        aliases:
+          - cpu-miner
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      "minerd \
+      --algo sha256d \
+      --threads 1 \
+      --coinbase-addr WiGFcSYHhfRqWJ7PXYvhjULXtXCYD1VFdS \
+      --url stratum+tcp://mining-server:9000 \
+      2>&1 | tee /tmp/miner.log"
+    healthcheck:
+      test: ["CMD", "sh", "-c", "grep -q 'hashes' /tmp/miner.log"]
+      start_period: 2s
+      timeout: 2s
+      retries: 10
+      interval: 2s
+  wallet:
+    image: hathornetwork/hathor-wallet-headless@sha256:fa3f080036611a1ec5d739244b873000e7a955f96e111efa27df7520942e7e24
+    depends_on:
+      cpu-miner:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    environment:
+      - HEADLESS_NETWORK=privatenet
+      - HEADLESS_SEEDS=genesis alice
+      - HEADLESS_SEED_GENESIS=avocado spot town typical traffic vault danger century property shallow divorce festival spend attack anchor afford rotate green audit adjust fade wagon depart level
+      - HEADLESS_SEED_ALICE=music endless reduce plunge accident multiply two curtain match balance present belt price burger mother crisp sock tumble napkin leopard unit upset original cause
+      - HEADLESS_SERVER=http://full-node:8080/v1a/
+      - HEADLESS_TX_MINING_URL=http://mining-server:9080
+      - HEADLESS_HTTP_PORT=8000
+      - HEADLESS_CONSOLE_LEVEL=debug
+    networks:
+      hathor:
+        aliases:
+          - wallet
+    healthcheck:
+      test: ["CMD", "sh", "-c", "timeout 1 nc -z 0.0.0.0 8000"]
+      start_period: 2s
+      timeout: 2s
+      retries: 10
+      interval: 2s
