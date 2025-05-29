@@ -7,6 +7,10 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
+    "build-frontend": "cd ../Frontend && npm run build",
+    "build-and-start": "npm run build-frontend && npm start",
+    "install-all": "npm install && cd ../Frontend && npm install",
+    "dev-frontend": "cd ../Frontend && npm run dev",
     "install-deps": "npm install",
     "setup": "npm install && npm start",
     "clean-install": "rm -rf node_modules package-lock.json && npm install"

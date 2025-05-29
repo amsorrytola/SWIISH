@@ -3,9 +3,50 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, shrink-to-fit=no, viewport-fit=cover" />
     <title>SWIISH - DeFi in Telegram</title>
+    
+    <!-- Telegram WebApp Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Telegram WebApp specific meta tags -->
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <!-- Content Security Policy for Telegram -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https: wss:;">
+    
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: var(--tg-theme-bg-color, #ffffff);
+        color: var(--tg-theme-text-color, #000000);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      }
+      
+      /* Telegram Mini App specific styles */
+      .telegram-miniapp {
+        height: 100vh;
+        overflow: hidden;
+      }
+    </style>
+    
+    <script>
+      // Telegram Mini App initialization script
+      window.addEventListener('load', function() {
+        if (window.Telegram && window.Telegram.WebApp) {
+          console.log('Telegram WebApp available');
+          document.body.classList.add('telegram-miniapp');
+          
+          // Set viewport height for Telegram
+          const vh = window.innerHeight * 0.01;
+          document.documentElement.style.setProperty('--vh', vh + 'px');
+        }
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>

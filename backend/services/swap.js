@@ -1,204 +1,236 @@
 export class SwapService {
   constructor(hathorService, tokenService) {
-    this.hathor = hathorService;
-    this.tokens = tokenService;
-    this.pools = new Map();
-    this.feeRate = 0.003; // 0.3%
-    this.initializeSamplePools();
+    this.hathorService = hathorService;
+    this.tokenService = tokenService;
+    this.pools = this.initializePools();
   }
 
-  initializeSamplePools() {
-    // Initialize with sample pools for demo
-    const samplePools = [
+  initializePools() {
+    return [
       {
+        id: 1,
+        pair: 'ETH/USDT',
         tokenA: 'ETH',
         tokenB: 'USDT',
-        reserveA: 1000,
-        reserveB: 2500000,
+        reserveA: 1250.75,
+        reserveB: 2875432.50,
+        apy: 12.5,
+        tvl: 5750865,
         totalLPTokens: 50000,
-        lpHolders: new Map()
+        participants: 1247,
+        volume24h: 156000,
+        fee: 0.3,
+        priceA: 2300.34,
+        priceB: 1.00
       },
       {
+        id: 2,
+        pair: 'HTR/USDT',
         tokenA: 'HTR',
-        tokenB: 'SWIISH',
+        tokenB: 'USDT',
+        reserveA: 125000,
+        reserveB: 8750,
+        apy: 18.2,
+        tvl: 850000,
+        totalLPTokens: 12000,
+        participants: 432,
+        volume24h: 67000,
+        fee: 0.3,
+        priceA: 0.07,
+        priceB: 1.00
+      },
+      {
+        id: 3,
+        pair: 'SWIISH/HTR',
+        tokenA: 'SWIISH',
+        tokenB: 'HTR',
+        reserveA: 50000,
+        reserveB: 25000,
+        apy: 25.7,
+        tvl: 420000,
+        totalLPTokens: 8000,
+        participants: 156,
+        volume24h: 23000,
+        fee: 0.3,
+        priceA: 0.35,
+        priceB: 0.07
+      },
+      {
+        id: 4,
+        pair: 'BTC/ETH',
+        tokenA: 'BTC',
+        tokenB: 'ETH',
+        reserveA: 25.5,
+        reserveB: 450.75,
+        apy: 8.9,
+        tvl: 1850000,
+        totalLPTokens: 2500,
+        participants: 890,
+        volume24h: 245000,
+        fee: 0.3,
+        priceA: 67500,
+        priceB: 2300.34
+      },
+      {
+        id: 5,
+        pair: 'USDC/USDT',
+        tokenA: 'USDC',
+        tokenB: 'USDT',
         reserveA: 500000,
-        reserveB: 100000,
+        reserveB: 498750,
+        apy: 4.2,
+        tvl: 998750,
         totalLPTokens: 25000,
-        lpHolders: new Map()
+        participants: 2156,
+        volume24h: 89000,
+        fee: 0.3,
+        priceA: 0.9975,
+        priceB: 1.00
       }
     ];
-
-    samplePools.forEach(pool => {
-      const poolKey = this.getPoolKey(pool.tokenA, pool.tokenB);
-      this.pools.set(poolKey, pool);
-    });
-  }
-
-  async getQuote(fromToken, toToken, amount) {
-    const poolKey = this.getPoolKey(fromToken, toToken);
-    const pool = this.pools.get(poolKey);
-    
-    if (!pool) {
-      throw new Error('Pool not found');
-    }
-
-    const isFromTokenA = fromToken === pool.tokenA;
-    const reserveIn = isFromTokenA ? pool.reserveA : pool.reserveB;
-    const reserveOut = isFromTokenA ? pool.reserveB : pool.reserveA;
-
-    // Calculate output using constant product formula with fee
-    const amountInWithFee = amount * (1 - this.feeRate);
-    const numerator = amountInWithFee * reserveOut;
-    const denominator = reserveIn + amountInWithFee;
-    const outputAmount = numerator / denominator;
-
-    const priceImpact = this.calculatePriceImpact(amount, outputAmount, reserveIn, reserveOut);
-
-    return {
-      inputAmount: amount,
-      outputAmount,
-      priceImpact,
-      fee: amount * this.feeRate,
-      minimumReceived: outputAmount * 0.99, // 1% slippage tolerance
-      route: [fromToken, toToken]
-    };
-  }
-
-  async executeSwap({ userTelegramId, fromToken, toToken, fromAmount, minToAmount, slippage }) {
-    const quote = await this.getQuote(fromToken, toToken, fromAmount);
-    
-    if (quote.outputAmount < minToAmount) {
-      throw new Error('Slippage tolerance exceeded');
-    }
-
-    // Execute swap through nano contract
-    const swapTx = await this.hathor.callNanoContract(
-      this.getPoolContractId(fromToken, toToken),
-      'swap',
-      {
-        input_token: fromToken,
-        input_amount: fromAmount,
-        min_output: minToAmount
-      }
-    );
-
-    // Update pool reserves
-    const poolKey = this.getPoolKey(fromToken, toToken);
-    const pool = this.pools.get(poolKey);
-    if (pool) {
-      const isFromTokenA = fromToken === pool.tokenA;
-      if (isFromTokenA) {
-        pool.reserveA += fromAmount;
-        pool.reserveB -= quote.outputAmount;
-      } else {
-        pool.reserveB += fromAmount;
-        pool.reserveA -= quote.outputAmount;
-      }
-      this.pools.set(poolKey, pool);
-    }
-
-    return {
-      transactionId: swapTx.hash,
-      inputAmount: fromAmount,
-      outputAmount: quote.outputAmount,
-      fee: quote.fee,
-      priceImpact: quote.priceImpact
-    };
-  }
-
-  async addLiquidity({ userTelegramId, tokenA, tokenB, amountA, amountB }) {
-    const poolKey = this.getPoolKey(tokenA, tokenB);
-    let pool = this.pools.get(poolKey);
-
-    if (!pool) {
-      // Create new pool
-      pool = {
-        tokenA,
-        tokenB,
-        reserveA: 0,
-        reserveB: 0,
-        totalLPTokens: 0,
-        lpHolders: new Map()
-      };
-    }
-
-    // Calculate LP tokens to mint
-    let lpTokens;
-    if (pool.totalLPTokens === 0) {
-      lpTokens = Math.sqrt(amountA * amountB);
-    } else {
-      const lpFromA = (amountA * pool.totalLPTokens) / pool.reserveA;
-      const lpFromB = (amountB * pool.totalLPTokens) / pool.reserveB;
-      lpTokens = Math.min(lpFromA, lpFromB);
-    }
-
-    // Update pool state
-    pool.reserveA += amountA;
-    pool.reserveB += amountB;
-    pool.totalLPTokens += lpTokens;
-    
-    const currentLP = pool.lpHolders.get(userTelegramId) || 0;
-    pool.lpHolders.set(userTelegramId, currentLP + lpTokens);
-    
-    this.pools.set(poolKey, pool);
-
-    // Execute through nano contract
-    const liquidityTx = await this.hathor.callNanoContract(
-      this.getPoolContractId(tokenA, tokenB),
-      'add_liquidity',
-      {
-        amount_a: amountA,
-        amount_b: amountB
-      }
-    );
-
-    return {
-      transactionId: liquidityTx.hash,
-      lpTokens,
-      amountA,
-      amountB,
-      poolShare: (lpTokens / pool.totalLPTokens) * 100
-    };
   }
 
   async getLiquidityPools() {
-    const pools = [];
-    for (const [key, pool] of this.pools) {
-      const tvl = pool.reserveA + pool.reserveB; // Simplified TVL calculation
-      const apy = this.calculateAPY(pool);
-      
-      pools.push({
-        pair: `${pool.tokenA}/${pool.tokenB}`,
-        tokenA: pool.tokenA,
-        tokenB: pool.tokenB,
-        reserveA: pool.reserveA,
-        reserveB: pool.reserveB,
-        tvl: Math.round(tvl),
-        apy: Math.round(apy * 100) / 100,
-        totalLPTokens: pool.totalLPTokens,
-        myLiquidity: 0 // Default for demo
-      });
+    return this.pools.map(pool => ({
+      ...pool,
+      myLiquidity: 0,
+      myLPTokens: 0,
+      swiishRewards: Math.floor(pool.tvl * 0.0001) // Dynamic rewards based on TVL
+    }));
+  }
+
+  async getLiquidityQuote(poolId, amountA) {
+    const pool = this.pools.find(p => p.id === poolId);
+    if (!pool || !amountA || amountA <= 0) {
+      throw new Error('Invalid pool or amount');
     }
-    return pools;
+
+    const ratio = pool.reserveB / pool.reserveA;
+    const amountB = amountA * ratio;
+    
+    // Calculate LP tokens using constant product formula
+    const lpTokensToMint = Math.sqrt(amountA * amountB) / Math.sqrt(pool.reserveA * pool.reserveB) * pool.totalLPTokens;
+    
+    // Calculate pool share
+    const newTotalLP = pool.totalLPTokens + lpTokensToMint;
+    const poolShare = (lpTokensToMint / newTotalLP) * 100;
+    
+    // Price impact
+    const newReserveA = pool.reserveA + amountA;
+    const newReserveB = pool.reserveB + amountB;
+    const newPriceRatio = newReserveB / newReserveA;
+    const priceImpact = Math.abs((newPriceRatio - ratio) / ratio) * 100;
+
+    return {
+      amountB: amountB.toFixed(6),
+      lpTokens: lpTokensToMint.toFixed(6),
+      poolShare: poolShare.toFixed(4),
+      priceImpact: priceImpact.toFixed(2),
+      currentPrice: ratio.toFixed(6),
+      newPrice: newPriceRatio.toFixed(6)
+    };
   }
 
-  calculatePriceImpact(inputAmount, outputAmount, reserveIn, reserveOut) {
-    const expectedOutput = (inputAmount * reserveOut) / reserveIn;
-    return ((expectedOutput - outputAmount) / expectedOutput) * 100;
+  async addLiquidity(liquidityData) {
+    const { userTelegramId, poolId, amountA, amountB, slippage } = liquidityData;
+    
+    const pool = this.pools.find(p => p.id === poolId);
+    if (!pool) throw new Error('Pool not found');
+    
+    // Calculate LP tokens to mint
+    const lpTokensToMint = Math.sqrt(amountA * amountB) / Math.sqrt(pool.reserveA * pool.reserveB) * pool.totalLPTokens;
+    
+    // Update pool reserves (in real implementation, this would be stored in database)
+    pool.reserveA += amountA;
+    pool.reserveB += amountB;
+    pool.totalLPTokens += lpTokensToMint;
+    pool.tvl = (pool.reserveA * pool.priceA) + (pool.reserveB * pool.priceB);
+    
+    return {
+      success: true,
+      lpTokensReceived: lpTokensToMint,
+      poolShare: ((lpTokensToMint / pool.totalLPTokens) * 100).toFixed(4),
+      transactionId: 'lp_add_' + Math.random().toString(36).substr(2, 9),
+      timestamp: new Date().toISOString()
+    };
   }
 
-  calculateAPY(pool) {
-    // Simplified APY calculation based on trading volume and fees
-    // In a real implementation, this would use historical data
-    return Math.random() * 30 + 5; // 5-35% APY range
+  async removeLiquidity(liquidityData) {
+    const { userTelegramId, poolId, lpTokens, percentage } = liquidityData;
+    
+    const pool = this.pools.find(p => p.id === poolId);
+    if (!pool) throw new Error('Pool not found');
+    
+    const shareOfPool = lpTokens / pool.totalLPTokens;
+    const amountA = pool.reserveA * shareOfPool;
+    const amountB = pool.reserveB * shareOfPool;
+    const liquidityRemoved = (amountA * pool.priceA) + (amountB * pool.priceB);
+    
+    // Update pool reserves
+    pool.reserveA -= amountA;
+    pool.reserveB -= amountB;
+    pool.totalLPTokens -= lpTokens;
+    pool.tvl = (pool.reserveA * pool.priceA) + (pool.reserveB * pool.priceB);
+    
+    return {
+      success: true,
+      amountA: amountA.toFixed(6),
+      amountB: amountB.toFixed(6),
+      liquidityRemoved,
+      transactionId: 'lp_remove_' + Math.random().toString(36).substr(2, 9),
+      timestamp: new Date().toISOString()
+    };
   }
 
-  getPoolKey(tokenA, tokenB) {
-    return [tokenA, tokenB].sort().join('-');
+  async getQuote(fromToken, toToken, amount) {
+    // Find appropriate pool for the token pair
+    const pool = this.pools.find(p => 
+      (p.tokenA === fromToken && p.tokenB === toToken) ||
+      (p.tokenA === toToken && p.tokenB === fromToken)
+    );
+    
+    if (!pool) {
+      throw new Error(`No pool found for ${fromToken}/${toToken}`);
+    }
+    
+    const isTokenAInput = pool.tokenA === fromToken;
+    const reserveIn = isTokenAInput ? pool.reserveA : pool.reserveB;
+    const reserveOut = isTokenAInput ? pool.reserveB : pool.reserveA;
+    
+    // AMM constant product formula: x * y = k
+    const amountInWithFee = amount * (1 - pool.fee / 100);
+    const outputAmount = (reserveOut * amountInWithFee) / (reserveIn + amountInWithFee);
+    
+    const priceImpact = ((amount / reserveIn) * 100);
+    const fee = amount * (pool.fee / 100);
+    
+    return {
+      outputAmount,
+      priceImpact,
+      fee,
+      minimumReceived: outputAmount * 0.995, // 0.5% slippage tolerance
+      route: `${fromToken} → ${toToken}`,
+      poolUsed: pool.pair
+    };
   }
 
-  getPoolContractId(tokenA, tokenB) {
-    // Return the nano contract ID for this trading pair
-    return `pool_${this.getPoolKey(tokenA, tokenB)}`;
+  async executeSwap(swapData) {
+    const { fromToken, toToken, fromAmount, feeReduction } = swapData;
+    
+    const quote = await this.getQuote(fromToken, toToken, fromAmount);
+    
+    // Apply NFT fee reduction
+    const adjustedFee = quote.fee * (1 - (feeReduction || 0) / 100);
+    const adjustedOutput = quote.outputAmount + (quote.fee - adjustedFee);
+    
+    return {
+      success: true,
+      outputAmount: adjustedOutput,
+      feeReduction: feeReduction || 0,
+      actualFee: adjustedFee,
+      savedFees: quote.fee - adjustedFee,
+      transactionId: 'swap_' + Math.random().toString(36).substr(2, 9),
+      timestamp: new Date().toISOString()
+    };
   }
 }
