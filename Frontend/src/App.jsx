@@ -50,7 +50,57 @@ const SwiishApp = () => {
   const [error, setError] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
   const [services, setServices] = useState(null);
-  const {connectHathorWallet , client , account} = useContext(WalletConnectContext)
+  const {connectHathorWallet , client , account , session} = useContext(WalletConnectContext)
+
+  const addLiquidityFunc = async () => {
+    console.log("Adding liquidity")
+    await sendTx({ method: "add_liquidity"});
+  }
+
+  const CONTRACT_ID ="00001ffdfe046cfb5f7e325244810f3f6678e6f97034a6fd448996c3a26fc7b4"
+  const TOKEN_ID = "00"
+  const sendTx = async ({ method, args = [] }) => {
+  
+
+  console.log(client)
+  console.log(session)
+  console.log(CONTRACT_ID)
+  console.log(TOKEN_ID)
+
+  if (!client || !session) {
+    console.log("kuch gayab hai")
+    return
+  };
+
+  try {
+    const result = await client.request({
+      topic: session.topic,
+      chainId: "hathor:testnet",
+      request: {
+        method: "htr_sendNanoContractTx",
+        id: Date.now(),
+        jsonrpc: "2.0",
+        params: {
+          method,
+          nc_id: CONTRACT_ID,
+          actions: [
+            {
+              type: "deposit",
+              token: TOKEN_ID,
+              amount: 10,
+            }
+          ],
+          args,
+          push_tx: true,
+        },
+      },
+    });
+    console.log(`✅ ${method} called successfully:`, result);
+  } catch (error) {
+    console.error(`❌ Error calling ${method}:`, error);
+  }
+};
+
 
   
   const [swapData, setSwapData] = useState({
@@ -1174,6 +1224,11 @@ const SwiishApp = () => {
             className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 sm:py-4 rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {swapLoading ? 'Swapping...' : walletConnected ? 'Swap (External)' : 'Swap (Internal)'}
+          </button>
+          <button
+            onClick={addLiquidityFunc}
+          >
+            transact
           </button>
         </div>
       </div>
