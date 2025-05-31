@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Wallet, Coins, Users, Zap, Trophy, Vote, TrendingUp, ArrowUpDown, Gift, Settings, ChevronRight, Plus, Minus, Moon, Sun, ExternalLink } from 'lucide-react';
+import {WalletConnectContext} from "./context/WalletConnectContext"
 
 // Create fallback services
 const createFallbackServices = () => {
@@ -49,6 +50,8 @@ const SwiishApp = () => {
   const [error, setError] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
   const [services, setServices] = useState(null);
+  const {connectHathorWallet , client , account} = useContext(WalletConnectContext)
+
   
   const [swapData, setSwapData] = useState({
     fromToken: 'ETH',
@@ -130,14 +133,22 @@ const SwiishApp = () => {
     if (!services) return;
     
     try {
-      const connection = await services.walletConnectService.connect();
-      setWalletConnected(true);
-      setWalletAddress(connection.address);
+      const address = await connectHathorWallet()
+      if (address){
+        setWalletConnected(true);
+        setWalletAddress(address);
+      }
+      else {
+        throw new Error('Failed to connect wallet');
+      }
+      // const connection = await services.walletConnectService.connect();
+      // setWalletConnected(true);
+      // setWalletAddress(connection.address);
       
-      const balance = await services.walletConnectService.getBalance();
-      setWalletBalance(balance);
+      // const balance = await services.walletConnectService.getBalance();
+      // setWalletBalance(balance);
       
-      console.log('Wallet connected:', connection);
+      // console.log('Wallet connected:', connection);
     } catch (error) {
       console.error('Wallet connection failed:', error);
       alert('Failed to connect wallet: ' + error.message);

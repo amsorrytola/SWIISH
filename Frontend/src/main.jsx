@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
+import {WalletConnectProvider} from "./context/WalletConnectContext";
 
 // Initialize Telegram WebApp if available
 if (window.Telegram?.WebApp) {
@@ -67,7 +68,9 @@ class ErrorBoundary extends React.Component {
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
-      <App />
+      <WalletConnectProvider>
+        <App />
+      </WalletConnectProvider>
     </ErrorBoundary>
-  </React.StrictMode>,
+  </React.StrictMode>
 )
