@@ -3,6 +3,12 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  define: {
+    global: 'globalThis',
+  },
+  optimizeDeps: {
+    include: ['@walletconnect/client', '@walletconnect/qrcode-modal', 'ethers']
+  },
   server: {
     host: '0.0.0.0',
     port: 5173,
@@ -40,6 +46,7 @@ export default defineConfig({
     allowedHosts: [
       'localhost',
       '127.0.0.1',
+      'c281-119-252-195-223.ngrok-free.app',
       'e76d-45-251-49-135.ngrok-free.app',
       '6573-45-251-49-31.ngrok-free.app',
       '.ngrok-free.app',

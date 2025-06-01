@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Wallet, Coins, Users, Zap, Trophy, Vote, TrendingUp, ArrowUpDown, Gift, Settings, ChevronRight, Plus, Minus, Moon, Sun, ExternalLink } from 'lucide-react';
+import WalletConnectModal from './components/WalletConnectModal.jsx';
 
 // Create fallback services
 const createFallbackServices = () => {
@@ -88,6 +89,9 @@ const SwiishApp = () => {
     loyaltyPoints: 0,
     votingPower: 0
   });
+  const [walletConnectUri, setWalletConnectUri] = useState(null);
+  const [showWalletModal, setShowWalletModal] = useState(false);
+  const [walletConnectionStatus, setWalletConnectionStatus] = useState('disconnected');
 
   // Initialize services
   useEffect(() => {
@@ -102,16 +106,23 @@ const SwiishApp = () => {
           import('./services/walletConnect.js').catch(() => null)
         ]);
 
-        const fallbacks = createFallbackServices();
-        
-        const loadedServices = {
-          apiService: apiModule.status === 'fulfilled' && apiModule.value?.default ? apiModule.value.default : fallbacks.apiService,
-          telegramApiService: telegramApiModule.status === 'fulfilled' && telegramApiModule.value?.default ? telegramApiModule.value.default : fallbacks.telegramApiService,
-          walletConnectService: walletConnectModule.status === 'fulfilled' && walletConnectModule.value?.default ? walletConnectModule.value.default : fallbacks.walletConnectService
+        const apiService = apiModule.status === 'fulfilled' && apiModule.value ? apiModule.value.default : null;
+        const telegramApiService = telegramApiModule.status === 'fulfilled' && telegramApiModule.value ? telegramApiModule.value.default : null;
+        const walletConnectService = walletConnectModule.status === 'fulfilled' && walletConnectModule.value ? walletConnectModule.value.default : null;
+
+        if (walletConnectService) {
+          // Make wallet service globally available for demo purposes
+          window.swiishWalletService = walletConnectService;
+        }
+
+        const services = {
+          apiService: apiService || createFallbackServices().apiService,
+          telegramApiService: telegramApiService || createFallbackServices().telegramApiService,
+          walletConnectService: walletConnectService || createFallbackServices().walletConnectService
         };
 
-        setServices(loadedServices);
-        console.log('Services initialized successfully');
+        setServices(services);
+        console.log('Services initialized:', services);
       } catch (error) {
         console.error('Failed to initialize services:', error);
         setServices(createFallbackServices());
@@ -126,21 +137,53 @@ const SwiishApp = () => {
     return isTelegramWebApp ? services.telegramApiService : services.apiService;
   };
 
-  const connectWallet = async () => {
+  const connectWallet = async (connectionMode = 'manual') => {
     if (!services) return;
     
     try {
-      const connection = await services.walletConnectService.connect();
+      setWalletConnectionStatus('connecting');
+      
+      // Only show modal for WalletConnect, not MetaMask
+      if (connectionMode === 'manual') {
+        setShowWalletModal(true);
+      }
+      
+      // Set up URI callback for QR code display
+      services.walletConnectService.setDisplayUriCallback((uri) => {
+        console.log('Received QR URI:', uri);
+        setWalletConnectUri(uri);
+      });
+      
+      const connection = await services.walletConnectService.connect(connectionMode);
+      
       setWalletConnected(true);
       setWalletAddress(connection.address);
+      setWalletConnectionStatus('connected');
+      setShowWalletModal(false);
       
       const balance = await services.walletConnectService.getBalance();
       setWalletBalance(balance);
       
-      console.log('Wallet connected:', connection);
+      console.log('Wallet connected via:', connection.method, connection);
+      
+      // Show success message with connection method
+      const methodText = connection.method === 'metamask' ? 'MetaMask' : 'WalletConnect';
+      if (window.Telegram?.WebApp) {
+        window.Telegram.WebApp.showAlert(`${methodText} wallet connected successfully!`);
+      } else {
+        alert(`${methodText} wallet connected successfully!`);
+      }
+      
     } catch (error) {
       console.error('Wallet connection failed:', error);
-      alert('Failed to connect wallet: ' + error.message);
+      setWalletConnectionStatus('error');
+      setShowWalletModal(false);
+      
+      if (window.Telegram?.WebApp) {
+        window.Telegram.WebApp.showAlert('Failed to connect wallet: ' + error.message);
+      } else {
+        alert('Failed to connect wallet: ' + error.message);
+      }
     }
   };
 
@@ -152,6 +195,10 @@ const SwiishApp = () => {
       setWalletConnected(false);
       setWalletAddress(null);
       setWalletBalance('0');
+      setWalletConnectionStatus('disconnected');
+      setWalletConnectUri(null);
+      
+      console.log('Wallet disconnected');
     } catch (error) {
       console.error('Wallet disconnect failed:', error);
     }
@@ -1023,32 +1070,129 @@ const SwiishApp = () => {
 
   const renderSwapTab = () => (
     <div className="space-y-4 sm:space-y-6">
+      {/* Enhanced Wallet Connection Card */}
       <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
         <div className="flex justify-between items-center">
-          <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white">External Wallet</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              {walletConnected ? `${walletAddress?.slice(0, 6)}...${walletAddress?.slice(-4)}` : 'Not connected'}
-            </p>
-            {walletConnected && (
-              <p className="text-xs text-gray-500 dark:text-gray-500">
-                Balance: {parseFloat(walletBalance).toFixed(4)} ETH
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="font-semibold text-gray-900 dark:text-white">External Wallet</h3>
+              {walletConnected && (
+                <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 text-xs rounded-full">
+                  Connected
+                </span>
+              )}
+              {walletConnectionStatus === 'connecting' && (
+                <span className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 text-xs rounded-full">
+                  Connecting...
+                </span>
+              )}
+            </div>
+            
+            {walletConnected ? (
+              <div className="space-y-1">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {walletAddress?.slice(0, 6)}...{walletAddress?.slice(-4)}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-500">
+                  Balance: {parseFloat(walletBalance).toFixed(4)} ETH
+                </p>
+                <p className="text-xs text-blue-600 dark:text-blue-400">
+                  Chain ID: {services?.walletConnectService?.chainId || 'Unknown'}
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Connect your wallet to trade on external chains
               </p>
             )}
           </div>
-          <button
-            onClick={walletConnected ? disconnectWallet : connectWallet}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              walletConnected
-                ? 'bg-red-500 text-white hover:bg-red-600'
-                : 'bg-blue-500 text-white hover:bg-blue-600'
-            }`}
-          >
-            {walletConnected ? 'Disconnect' : 'Connect Wallet'}
-          </button>
+          
+          <div className="flex flex-col gap-2">
+            {!walletConnected ? (
+              <>
+                <button
+                  onClick={() => connectWallet('manual')}
+                  disabled={walletConnectionStatus === 'connecting'}
+                  className={`px-3 py-2 rounded-lg font-medium text-sm transition-colors ${
+                    walletConnectionStatus === 'connecting'
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-blue-500 text-white hover:bg-blue-600'
+                  }`}
+                >
+                  {walletConnectionStatus === 'connecting' ? 'Connecting...' : 'Connect Wallet'}
+                </button>
+                {typeof window.ethereum !== 'undefined' && (
+                  <button
+                    onClick={() => connectWallet('metamask')}
+                    disabled={walletConnectionStatus === 'connecting'}
+                    className={`px-3 py-2 rounded-lg font-medium text-sm transition-colors ${
+                      walletConnectionStatus === 'connecting'
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-orange-500 text-white hover:bg-orange-600'
+                    }`}
+                  >
+                    MetaMask Direct
+                  </button>
+                )}
+              </>
+            ) : (
+              <button
+                onClick={disconnectWallet}
+                className="px-4 py-2 rounded-lg font-medium transition-colors bg-red-500 text-white hover:bg-red-600"
+              >
+                Disconnect
+              </button>
+            )}
+          </div>
         </div>
+        
+        {walletConnected && (
+          <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+            <div className="flex gap-2">
+              <button
+                onClick={() => services.walletConnectService.switchChain(1)}
+                className="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
+              >
+                Ethereum
+              </button>
+              <button
+                onClick={() => services.walletConnectService.switchChain(56)}
+                className="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
+              >
+                BSC
+              </button>
+              <button
+                onClick={() => services.walletConnectService.switchChain(137)}
+                className="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
+              >
+                Polygon
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
+      {/* WalletConnect Modal */}
+      <WalletConnectModal
+        isOpen={showWalletModal}
+        onClose={() => {
+          setShowWalletModal(false);
+          setWalletConnectionStatus('disconnected');
+          if (services?.walletConnectService) {
+            services.walletConnectService.cancelConnection();
+          }
+        }}
+        uri={walletConnectUri}
+        onConnect={(connection) => {
+          setWalletConnected(true);
+          setWalletAddress(connection.address);
+          setWalletConnectionStatus('connected');
+          setShowWalletModal(false);
+        }}
+        onMetaMaskConnect={() => connectWallet('metamask')}
+      />
+
+      {/* Rest of swap interface */}
       <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100 dark:border-gray-700">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Token Swap</h2>

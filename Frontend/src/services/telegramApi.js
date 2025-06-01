@@ -14,7 +14,7 @@ class TelegramApiService {
       console.log('Current hostname:', window.location.hostname);
       
       // Handle ngrok URLs specifically
-      if (window.location.hostname.includes('ngrok')) {
+      if (window.location.hostname.includes('ngrok') || window.location.hostname.includes('c281-119-252-195-223')) {
         console.log('ngrok URL detected');
         return currentUrl + '/api';
       }
@@ -86,6 +86,7 @@ class TelegramApiService {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       
+      // Force HTTP/1.1 by setting specific headers
       xhr.open(config.method || 'GET', url, true);
       
       // Set headers
@@ -93,15 +94,26 @@ class TelegramApiService {
         xhr.setRequestHeader(key, value);
       });
       
-      // Add ngrok bypass header if needed
-      if (url.includes('ngrok')) {
-        xhr.setRequestHeader('ngrok-skip-browser-warning', 'true');
+      // Add specific headers for Telegram compatibility
+      xhr.setRequestHeader('ngrok-skip-browser-warning', 'true');
+      xhr.setRequestHeader('Cache-Control', 'no-cache');
+      xhr.setRequestHeader('Connection', 'close');
+      xhr.setRequestHeader('X-Telegram-Compatible', 'true');
+      
+      // Add Telegram WebApp specific headers
+      if (window.Telegram?.WebApp) {
+        xhr.setRequestHeader('X-Telegram-WebApp', 'true');
+        if (window.Telegram.WebApp.version) {
+          xhr.setRequestHeader('X-Telegram-WebApp-Version', window.Telegram.WebApp.version);
+        }
       }
       
-      xhr.timeout = 15000; // 15 second timeout
+      xhr.timeout = 10000; // Reduced timeout for better Telegram compatibility
       
       xhr.onload = function() {
         try {
+          console.log(`XHR Response: ${xhr.status} for ${url}`);
+          
           if (xhr.status >= 200 && xhr.status < 300) {
             const contentType = xhr.getResponseHeader('content-type');
             let data;
@@ -122,17 +134,28 @@ class TelegramApiService {
       };
       
       xhr.onerror = function() {
+        console.error('XHR Network error for:', url);
         reject(new Error('Network error occurred'));
       };
       
       xhr.ontimeout = function() {
+        console.error('XHR Timeout for:', url);
         reject(new Error('Request timeout'));
       };
       
-      if (config.body) {
-        xhr.send(config.body);
-      } else {
-        xhr.send();
+      xhr.onabort = function() {
+        console.error('XHR Aborted for:', url);
+        reject(new Error('Request aborted'));
+      };
+      
+      try {
+        if (config.body) {
+          xhr.send(config.body);
+        } else {
+          xhr.send();
+        }
+      } catch (error) {
+        reject(new Error('Failed to send request: ' + error.message));
       }
     });
   }
@@ -230,6 +253,19 @@ class TelegramApiService {
       method: 'POST',
       body: JSON.stringify(stakingData),
     });
+  }
+
+  // Add a test connectivity method
+  async testConnection() {
+    try {
+      console.log('Testing Telegram API connection...');
+      const response = await this.request('/telegram/status');
+      console.log('Connection test successful:', response);
+      return response;
+    } catch (error) {
+      console.error('Connection test failed:', error);
+      throw error;
+    }
   }
 }
 

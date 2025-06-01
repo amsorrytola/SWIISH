@@ -20,10 +20,20 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Force HTTP/1.1 for better Telegram compatibility
+// Force HTTP/1.1 for better Telegram compatibility - ENHANCED
 app.use((req, res, next) => {
+  // Force HTTP/1.1 and disable keep-alive
   res.setHeader('Connection', 'close');
-  res.setHeader('Keep-Alive', 'timeout=5, max=1000');
+  res.setHeader('Keep-Alive', 'timeout=0, max=0');
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, private');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  
+  // Add Telegram Mini App specific headers
+  res.setHeader('X-Frame-Options', 'ALLOWALL');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  
   next();
 });
 
@@ -31,27 +41,22 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Add specific middleware for Telegram WebApp first
+// Enhanced Telegram WebApp middleware
 app.use((req, res, next) => {
-  // Set headers for Telegram WebApp
+  // Set CORS headers for all requests
   res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Telegram-Init-Data, ngrok-skip-browser-warning');
-  res.header('Cache-Control', 'no-cache, no-store, must-revalidate');
-  res.header('Pragma', 'no-cache');
-  res.header('Expires', '0');
-  res.header('X-Content-Type-Options', 'nosniff');
-  res.header('X-Frame-Options', 'SAMEORIGIN');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, HEAD');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Telegram-Init-Data, ngrok-skip-browser-warning, Accept, Origin, X-Requested-With');
+  res.header('Access-Control-Max-Age', '86400');
   
-  // Add Telegram Mini App specific headers
-  if (req.headers['user-agent'] && req.headers['user-agent'].includes('TelegramBot')) {
-    res.header('Content-Security-Policy', "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:;");
-    res.header('X-Robots-Tag', 'noindex, nofollow');
-  }
+  // Telegram Mini App CSP
+  res.header('Content-Security-Policy', "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https: wss: *; frame-ancestors *; frame-src *;");
   
-  // Handle preflight requests
+  // Handle preflight requests immediately
   if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
+    console.log('Handling OPTIONS preflight request for:', req.url);
+    res.status(200).end();
+    return;
   }
   
   next();
@@ -74,7 +79,7 @@ app.use((req, res, next) => {
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    'https://6573-45-251-49-31.ngrok-free.app',
+    'https://c281-119-252-195-223.ngrok-free.app',
     'https://*.ngrok-free.app',
     'https://*.ngrok.io',
     'https://web.telegram.org',
@@ -402,6 +407,11 @@ app.get('/api/liquidity/pools', async (req, res) => {
     ];
 
     console.log('Returning liquidity pools:', pools.length);
+    
+    // Set specific headers for this response
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader('X-Telegram-Compatible', 'true');
+    
     res.json(pools);
   } catch (error) {
     console.error('Error getting liquidity pools:', error);
@@ -674,14 +684,40 @@ app.get('/api/nft/user/:telegramId', validateTelegramAuth, async (req, res) => {
   }
 });
 
-// Health check with Telegram Mini App support
+// Health check with enhanced Telegram compatibility
 app.get('/health', (req, res) => {
+  console.log('Health check request from:', req.headers['user-agent'] || 'unknown');
+  
   const response = { 
     status: 'OK', 
     timestamp: new Date().toISOString(),
-    telegram: req.isTelegramMiniApp || false
+    telegram: req.isTelegramMiniApp || false,
+    httpVersion: req.httpVersion,
+    headers: {
+      host: req.headers.host,
+      userAgent: req.headers['user-agent'],
+      telegramInitData: !!req.headers['x-telegram-init-data']
+    }
   };
+  
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('X-Telegram-Compatible', 'true');
   res.json(response);
+});
+
+// Special Telegram compatibility endpoint
+app.get('/api/telegram/status', (req, res) => {
+  console.log('Telegram status check');
+  
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('X-Telegram-Compatible', 'true');
+  
+  res.json({
+    status: 'telegram_ready',
+    timestamp: new Date().toISOString(),
+    server: 'SWIISH Backend',
+    version: '1.0.0'
+  });
 });
 
 // Serve the React app for any non-API routes
@@ -703,15 +739,24 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start server with better error handling
+// Start server with HTTP/1.1 enforcement
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`SWIISH Backend running on port ${PORT}`);
+  console.log(`Server accessible at: http://localhost:${PORT}`);
+  console.log(`Ngrok URL: ${process.env.NGROK_URL || 'https://c281-119-252-195-223.ngrok-free.app'}`);
+  console.log('HTTP/1.1 forced for Telegram compatibility');
   
   // Initialize database
   dbService.initialize().catch(console.error);
   
   // Connect to Hathor network
   hathorService.initialize().catch(console.error);
+});
+
+// Force HTTP/1.1 on server
+server.on('connection', (socket) => {
+  socket.setNoDelay(true);
+  socket.setKeepAlive(false);
 });
 
 // Handle server errors

@@ -9,14 +9,22 @@
     <!-- Telegram WebApp Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    <!-- Telegram WebApp specific meta tags -->
+    <!-- WalletConnect Scripts for better compatibility -->
+    <script src="https://unpkg.com/@walletconnect/client@1.8.0/dist/umd/index.min.js"></script>
+    <script src="https://unpkg.com/@walletconnect/qrcode-modal@1.8.0/dist/umd/index.min.js"></script>
+    
+    <!-- Enhanced Telegram WebApp meta tags -->
     <meta name="format-detection" content="telephone=no" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="telegram-miniapp" content="yes" />
     
-    <!-- Content Security Policy for Telegram -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https: wss:;">
+    <!-- Enhanced Content Security Policy for Telegram -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https: wss: *; frame-ancestors *; frame-src *; connect-src *;">
+    
+    <!-- Force HTTP/1.1 for ngrok compatibility -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     
     <style>
       body {
@@ -25,30 +33,118 @@
         background-color: var(--tg-theme-bg-color, #ffffff);
         color: var(--tg-theme-text-color, #000000);
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
       
       /* Telegram Mini App specific styles */
       .telegram-miniapp {
         height: 100vh;
         overflow: hidden;
+        touch-action: manipulation;
+      }
+      
+      /* Loading screen for better UX */
+      .loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        color: white;
+        font-size: 18px;
+        font-weight: bold;
       }
     </style>
     
     <script>
-      // Telegram Mini App initialization script
+      // Enhanced Telegram Mini App initialization
       window.addEventListener('load', function() {
+        console.log('Page loaded, initializing WalletConnect...');
+        
+        // Check for WalletConnect availability with retry
+        const checkWalletConnect = (attempts = 0) => {
+          if (window.WalletConnect) {
+            console.log('WalletConnect library loaded successfully');
+            window.walletConnectAvailable = true;
+          } else if (attempts < 5) {
+            console.log(`WalletConnect not ready, retrying... (${attempts + 1}/5)`);
+            setTimeout(() => checkWalletConnect(attempts + 1), 1000);
+          } else {
+            console.log('WalletConnect library failed to load, using fallback mode');
+            window.walletConnectAvailable = false;
+          }
+        };
+        
+        checkWalletConnect();
+        
+        // Check for WalletConnect availability
+        if (window.WalletConnect) {
+          console.log('WalletConnect library loaded successfully');
+        } else {
+          console.log('WalletConnect library not available, using fallback');
+        }
+        
         if (window.Telegram && window.Telegram.WebApp) {
-          console.log('Telegram WebApp available');
+          console.log('Telegram WebApp available, version:', window.Telegram.WebApp.version);
           document.body.classList.add('telegram-miniapp');
+          
+          // Initialize Telegram WebApp
+          window.Telegram.WebApp.ready();
+          window.Telegram.WebApp.expand();
+          window.Telegram.WebApp.enableClosingConfirmation();
+          
+          // Set theme
+          if (window.Telegram.WebApp.colorScheme === 'dark') {
+            document.documentElement.classList.add('dark');
+          }
           
           // Set viewport height for Telegram
           const vh = window.innerHeight * 0.01;
           document.documentElement.style.setProperty('--vh', vh + 'px');
+          
+          console.log('Telegram WebApp initialized successfully');
+        } else {
+          console.log('Running in browser mode (not Telegram)');
+        }
+        
+        // Remove loading screen
+        setTimeout(() => {
+          const loadingScreen = document.querySelector('.loading-screen');
+          if (loadingScreen) {
+            loadingScreen.style.display = 'none';
+          }
+        }, 1000);
+      });
+      
+      // Handle errors
+      window.addEventListener('error', function(event) {
+        console.error('Global error caught:', event.error);
+        if (window.Telegram?.WebApp) {
+          window.Telegram.WebApp.showAlert('An error occurred. Please try refreshing the app.');
+        }
+      });
+
+      // Enhanced error handling for WalletConnect
+      window.addEventListener('unhandledrejection', function(event) {
+        console.error('Unhandled promise rejection:', event.reason);
+        if (event.reason?.message?.includes('WalletConnect')) {
+          console.log('WalletConnect related error detected, attempting recovery...');
+          // Clear any stuck WalletConnect state
+          localStorage.removeItem('walletconnect');
         }
       });
     </script>
   </head>
   <body>
+    <div class="loading-screen">
+      <div>Loading SWIISH...</div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
