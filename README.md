@@ -2,6 +2,57 @@
 
 SWIISH is an on-chain liquidity pool that lets users deposit two arbitrary tokens (Token A and Token B) into a constant-product AMM. Liquidity providers earn **iSWIISH** tokens as a reward. Traders can swap between Token A and Token B, paying a small HTR fee, and receive **uSWIISH** tokens for each swap. The contract also supports minting and claiming NFTs (two parallel DAO systems: Investor DAO & User DAO) based on SWIISH holdings. Finally, accumulated HTR fees can be distributed pro-rata to iSWIISH holders (minus a 5% owner fee).
 
+## 🛠️ Setup Instructions
+
+Follow these steps to set up and run the project locally:
+
+---
+
+### 📥 Clone the Repository
+
+```bash
+git clone https://github.com/amsorrytola/SWIISH
+cd SWIISH
+```
+
+---
+
+### 🐳 Start the Application Using Docker
+
+Ensure you have **Docker** and **Docker Compose** installed on your machine. Then run:
+
+```bash
+docker compose up
+```
+
+This will build and start the app along with any required services.
+
+---
+
+### 🌐 Access the Application
+
+Once the application is running, open your browser and go to:
+
+```
+http://localhost:5173
+```
+
+---
+
+### 🔗 Connect Wallet
+
+1. Click on the **Connect Wallet** button in the UI.
+2. Select **Hathor Wallet** via **WalletConnect**.
+3. Authorize the connection using your Hathor Wallet mobile app.
+
+---
+
+### 💸 Interact with the App
+
+- You can now deposit tokens, swap assets, and earn rewards.
+- Every transaction is securely executed via the connected **Hathor Wallet**.
+- Confirm each transaction directly in your wallet interface.
+
 ---
 
 ## Key Features
