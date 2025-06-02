@@ -151,7 +151,7 @@ const SwiishApp = () => {
           nc_id: CONTRACT_ID,
           actions: [
             {
-              type: "withdrawal",
+              type: "deposit",
               token: tola2,
               amount: 1000.
             },
@@ -165,11 +165,11 @@ const SwiishApp = () => {
             //   token : TOKEN_ID,
             //   amount : 3
             // },
-            {
-              type : "withdrawal",
-              token : iswiish,
-              amount : 10000
-            }
+            // {
+            //   type : "withdrawal",
+            //   token : iswiish,
+            //   amount : 10000
+            // }
           ],
           args,
           push_tx: true,
@@ -201,11 +201,11 @@ const sendTxForSwap = async ({ method, args = [] }) => {
           method,
           nc_id: CONTRACT_ID,
           actions: [
-            {
-              type: "withdrawal",
-              token: tola2,
-              amount: 1000.
-            },
+            // {
+            //   type: "withdrawal",
+            //   token: tola2,
+            //   amount: 1000.
+            // },
             {
               type: "deposit",
               token: tola1,
@@ -216,11 +216,11 @@ const sendTxForSwap = async ({ method, args = [] }) => {
               token : TOKEN_ID,
               amount : 3
             },
-            {
-              type : "withdrawal",
-              token : uswiish,
-              amount : 1000
-            }
+            // {
+            //   type : "withdrawal",
+            //   token : uswiish,
+            //   amount : 1000
+            // }
           ],
           args,
           push_tx: true,
@@ -252,11 +252,11 @@ const sendTxForNFT = async ({ method, args = [] }) => {
           method,
           nc_id: CONTRACT_ID,
           actions: [
-            {
-              type: "withdrawal",
-              token: "0000009485b421a85fb5fb8215ed81ec34834055090e28c3d12207b6305669e5",
-              amount: 100.
-            }
+            // {
+            //   type: "withdrawal",
+            //   token: "0000009485b421a85fb5fb8215ed81ec34834055090e28c3d12207b6305669e5",
+            //   amount: 100.
+            // }
             // {
             //   type: "deposit",
             //   token: tola1,
@@ -272,6 +272,11 @@ const sendTxForNFT = async ({ method, args = [] }) => {
             //   token : uswiish,
             //   amount : 100
             // }
+            {
+              type: "deposit",
+              token: TOKEN_ID,
+              amount: 1
+            }
           ],
           args,
           push_tx: true,
