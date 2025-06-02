@@ -1,36 +1,4 @@
-# SWIISH Liquidity Pool Blueprint
-
-**SWIISH** is a Hathor Nano Contract (Blueprint) that implements a two-token Automated Market Maker (AMM) with additional features for rewarding liquidity providers and distributing HTR fees. This document describes the design, features, and how to deploy and interact with the SWIISH blueprint.
-
----
-
-## Table of Contents
-
-1. [Overview](#overview)  
-2. [Key Features](#key-features)  
-3. [Smart-Contract Flow](#smart-contract-flow)  
-4. [State Variables & Data Structures](#state-variables--data-structures)  
-5. [Public Methods](#public-methods)  
-   - [initialize](#initialize)  
-   - [add_liquidity](#add_liquidity)  
-   - [add_swiish_liquidity](#add_swiish_liquidity)  
-   - [swap](#swap)  
-   - [add_nft_liquidity](#add_nft_liquidity)  
-   - [claim_nft](#claim_nft)  
-   - [distribute_htr](#distribute_htr)  
-   - [withdraw_available_htr](#withdraw_available_htr)  
-6. [View Methods](#view-methods)  
-   - [get_reserves](#get_reserves)  
-   - [get_swiish_reserves](#get_swiish_reserves)  
-   - [check_nft_eligibility](#check_nft_eligibility)  
-   - [get_swap_quote](#get_swap_quote)  
-7. [Exception Classes](#exception-classes)  
-8. [Deployment & Usage](#deployment--usage)  
-9. [License](#license)  
-
----
-
-## Overview
+# SWIISH 
 
 SWIISH is an on-chain liquidity pool that lets users deposit two arbitrary tokens (Token A and Token B) into a constant-product AMM. Liquidity providers earn **iSWIISH** tokens as a reward. Traders can swap between Token A and Token B, paying a small HTR fee, and receive **uSWIISH** tokens for each swap. The contract also supports minting and claiming NFTs (two parallel DAO systems: Investor DAO & User DAO) based on SWIISH holdings. Finally, accumulated HTR fees can be distributed pro-rata to iSWIISH holders (minus a 5% owner fee).
 
@@ -70,7 +38,7 @@ SWIISH is an on-chain liquidity pool that lets users deposit two arbitrary token
 
 ---
 
-## Smart-Contract Flow
+## Flow
 
 1. **initialize(...)**  
    - Called once by the pool owner.  
@@ -103,6 +71,9 @@ SWIISH is an on-chain liquidity pool that lets users deposit two arbitrary token
 
 8. **withdraw_available_htr(...)**  
    - Any address with an HTR balance in `htr_withdrawable` can withdraw their full claim.
+     
+---![Screenshot from 2025-06-02 10-30-13](https://github.com/user-attachments/assets/810789c2-02ed-4610-8d25-e1d14198255d)
+
 
 ---
 
@@ -133,3 +104,5 @@ SWIISH is an on-chain liquidity pool that lets users deposit two arbitrary token
       token_a: 0,
       token_b: 0,
   }
+
+
