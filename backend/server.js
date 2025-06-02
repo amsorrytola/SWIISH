@@ -74,7 +74,7 @@ app.use((req, res, next) => {
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    'https://6573-45-251-49-31.ngrok-free.app',
+    'https://0b41-119-252-195-223.ngrok-free.app',
     'https://*.ngrok-free.app',
     'https://*.ngrok.io',
     'https://web.telegram.org',
@@ -629,9 +629,17 @@ app.post('/api/dao/proposal', validateTelegramAuth, async (req, res) => {
 // NFT endpoints
 app.get('/api/nft/marketplace', async (req, res) => {
   try {
-    const nfts = await nftService.getMarketplaceNFTs();
+    console.log('NFT marketplace request received');
+    const nfts = nftService.getMarketplaceNFTs();
+    console.log('Returning NFTs:', nfts.length);
+    
+    // Add CORS headers specifically for this endpoint
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Cache-Control', 'no-cache');
+    
     res.json(nfts);
   } catch (error) {
+    console.error('Error getting NFT marketplace:', error);
     res.status(500).json({ error: 'Failed to get NFT marketplace' });
   }
 });
@@ -639,37 +647,33 @@ app.get('/api/nft/marketplace', async (req, res) => {
 // Enhanced NFT redemption with tier tracking
 app.post('/api/nft/redeem', validateTelegramAuth, async (req, res) => {
   try {
-    const { nftId, cost, tier } = req.body;
+    const { nftId, cost, tier, type } = req.body;
+    const userTelegramId = req.user.telegramId;
     
-    const user = await dbService.getUser(req.user.telegramId);
-    if (user.loyalty_points < cost) {
-      return res.status(400).json({ error: 'Insufficient loyalty points' });
-    }
-
+    console.log('NFT redemption request:', { userTelegramId, nftId, cost, tier, type });
+    
     const result = await nftService.redeemNFT({
-      userTelegramId: req.user.telegramId,
+      userTelegramId,
       nftId,
       cost,
-      tier
+      tier,
+      type
     });
-
-    // Deduct loyalty points and update NFT status
-    await dbService.addLoyaltyPoints(req.user.telegramId, -cost);
-    await dbService.incrementNFTCount(req.user.telegramId);
-    await dbService.updateNFTTier(req.user.telegramId, tier);
-
+    
     res.json(result);
   } catch (error) {
-    console.error('Enhanced NFT redemption failed:', error);
+    console.error('Error redeeming NFT:', error);
     res.status(500).json({ error: 'Failed to redeem NFT' });
   }
 });
 
 app.get('/api/nft/user/:telegramId', validateTelegramAuth, async (req, res) => {
   try {
-    const nfts = await nftService.getUserNFTs(req.params.telegramId);
-    res.json(nfts);
+    const { telegramId } = req.params;
+    const userNFTs = await nftService.getUserNFTs(telegramId);
+    res.json(userNFTs);
   } catch (error) {
+    console.error('Error getting user NFTs:', error);
     res.status(500).json({ error: 'Failed to get user NFTs' });
   }
 });

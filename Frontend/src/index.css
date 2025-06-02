@@ -2,9 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom CSS Variables */
+/* Custom CSS Variables with Hathor branding */
 :root {
   --vh: 1vh;
+  --hathor-blue: #2563eb;
+  --hathor-purple: #7c3aed;
+  --hathor-gradient: linear-gradient(135deg, #2563eb 0%, #7c3aed 50%, #ec4899 100%);
 }
 
 /* Base styles */
@@ -27,7 +30,182 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
 }
+
+.dark body {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+/* Hathor Network branding elements */
+.hathor-gradient {
+  background: var(--hathor-gradient);
+}
+
+.hathor-glow {
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+}
+
+.hathor-border {
+  border: 2px solid transparent;
+  background: linear-gradient(white, white) padding-box,
+              var(--hathor-gradient) border-box;
+}
+
+/* Enhanced animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(37, 99, 235, 0.3); }
+  50% { box-shadow: 0 0 30px rgba(124, 58, 237, 0.5); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* NFT Card enhancements */
+.nft-card {
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.dark .nft-card {
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+}
+
+.nft-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.nft-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--hathor-gradient);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.nft-card:hover::before {
+  opacity: 1;
+}
+
+/* Rarity gradients */
+.rarity-legendary {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+  animation: glow 3s ease-in-out infinite alternate;
+}
+
+.rarity-epic {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+  animation: glow 2.5s ease-in-out infinite alternate;
+}
+
+.rarity-rare {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+.rarity-uncommon {
+  background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+}
+
+.rarity-common {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 50%, #374151 100%);
+}
+
+/* Enhanced button styles */
+.btn-hathor {
+  background: var(--hathor-gradient);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-hathor:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+}
+
+.btn-hathor::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn-hathor:hover::before {
+  left: 100%;
+}
+
+/* Power level indicators */
+.power-indicator {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.power-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--hathor-gradient);
+  animation: power-glow 2s ease-in-out infinite alternate;
+  transition: all 0.3s ease;
+}
+
+@keyframes power-glow {
+  0% { 
+    box-shadow: 0 0 5px rgba(37, 99, 235, 0.5);
+    transform: scale(1);
+  }
+  100% { 
+    box-shadow: 0 0 15px rgba(124, 58, 237, 0.8);
+    transform: scale(1.1);
+  }
+}
+
+.power-dot:nth-child(1) { animation-delay: 0s; }
+.power-dot:nth-child(2) { animation-delay: 0.2s; }
+.power-dot:nth-child(3) { animation-delay: 0.4s; }
+.power-dot:nth-child(4) { animation-delay: 0.6s; }
+.power-dot:nth-child(5) { animation-delay: 0.8s; }
 
 /* Telegram WebApp specific styles */
 .telegram-miniapp {
@@ -46,11 +224,8 @@ body {
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  @apply bg-gray-600 rounded-full;
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-500;
+  background: var(--hathor-gradient);
+  border-radius: 4px;
 }
 
 /* Light mode scrollbar */
@@ -63,11 +238,8 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 rounded-full;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400;
+  background: var(--hathor-gradient);
+  border-radius: 4px;
 }
 
 /* Smooth transitions */
@@ -75,10 +247,11 @@ body {
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-/* Input focus styles */
+/* Enhanced focus styles */
 input:focus, select:focus, textarea:focus {
   outline: none;
-  @apply ring-2 ring-purple-500 ring-opacity-50;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: var(--hathor-blue);
 }
 
 /* Button animations */
@@ -140,5 +313,360 @@ button:active {
 @media (min-width: 1024px) {
   .responsive-grid {
     grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Loading animations */
+@keyframes pulse-hathor {
+  0%, 100% {
+    opacity: 1;
+    background: var(--hathor-gradient);
+  }
+  50% {
+    opacity: 0.7;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  }
+}
+
+.animate-pulse-hathor {
+  animation: pulse-hathor 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* NFT specific enhancements */
+.nft-image-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.nft-image-container:hover {
+  transform: scale(1.05);
+}
+
+.nft-image-locked {
+  filter: grayscale(100%) contrast(50%) brightness(60%);
+  transition: filter 0.3s ease;
+}
+
+.nft-image-available {
+  filter: none;
+  transition: filter 0.3s ease;
+}
+
+.nft-image-available:hover {
+  filter: brightness(110%) saturate(120%);
+}
+
+/* Lock overlay animation */
+@keyframes lock-pulse {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+.lock-overlay {
+  animation: lock-pulse 2s ease-in-out infinite;
+}
+
+/* Cost hierarchy visual indicators */
+.cost-tier-1 { border-left: 4px solid #10b981; } /* Green - Entry */
+.cost-tier-2 { border-left: 4px solid #3b82f6; } /* Blue - Experienced */
+.cost-tier-3 { border-left: 4px solid #8b5cf6; } /* Purple - Super */
+.cost-tier-4 { border-left: 4px solid #f59e0b; } /* Orange - Legendary */
+.cost-tier-5 { border-left: 4px solid #ef4444; } /* Red - Ultimate */
+
+/* Enhanced rarity backgrounds with proper hierarchy colors */
+.rarity-legendary {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+  animation: glow 3s ease-in-out infinite alternate;
+}
+
+.rarity-epic {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+  animation: glow 2.5s ease-in-out infinite alternate;
+}
+
+.rarity-rare {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+.rarity-uncommon {
+  background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+}
+
+.rarity-common {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 50%, #374151 100%);
+}
+
+/* NFT card hover effects */
+.nft-card {
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.dark .nft-card {
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+}
+
+.nft-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Enhanced power level indicators with hierarchy */
+.power-indicator {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.power-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--hathor-gradient);
+  animation: power-glow 2s ease-in-out infinite alternate;
+  transition: all 0.3s ease;
+}
+
+@keyframes power-glow {
+  0% { 
+    box-shadow: 0 0 5px rgba(37, 99, 235, 0.5);
+    transform: scale(1);
+  }
+  100% { 
+    box-shadow: 0 0 15px rgba(124, 58, 237, 0.8);
+    transform: scale(1.1);
+  }
+}
+
+.power-dot:nth-child(1) { animation-delay: 0s; }
+.power-dot:nth-child(2) { animation-delay: 0.2s; }
+.power-dot:nth-child(3) { animation-delay: 0.4s; }
+.power-dot:nth-child(4) { animation-delay: 0.6s; }
+.power-dot:nth-child(5) { animation-delay: 0.8s; }
+
+/* Cost hierarchy indicators */
+.cost-indicator {
+  position: relative;
+}
+
+.cost-indicator::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: var(--hathor-gradient);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: destination-out;
+}
+
+/* Insufficient funds visual feedback */
+.insufficient-funds {
+  filter: grayscale(80%) opacity(60%);
+  position: relative;
+}
+
+.insufficient-funds::after {
+  content: 'Insufficient Funds';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.insufficient-funds:hover::after {
+  opacity: 1;
+}
+
+/* Enhanced NFT visual effects */
+.nft-visual {
+  position: relative;
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark .nft-visual {
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+}
+
+.nft-visual:hover {
+  transform: scale(1.05) rotateY(5deg);
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Tier-specific visual enhancements */
+.nft-tier-5 {
+  position: relative;
+}
+
+.nft-tier-5::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #fbbf24, #f59e0b, #d97706, #fbbf24);
+  background-size: 400% 400%;
+  border-radius: inherit;
+  z-index: -1;
+  animation: tier-glow 3s ease-in-out infinite;
+}
+
+.nft-tier-4::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #8b5cf6, #7c3aed, #6d28d9, #8b5cf6);
+  background-size: 400% 400%;
+  border-radius: inherit;
+  z-index: -1;
+  animation: tier-glow 2.5s ease-in-out infinite;
+}
+
+@keyframes tier-glow {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Enhanced sparkle effects */
+.sparkle-effect {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0;
+  animation: sparkle 2s infinite;
+}
+
+.sparkle-effect:nth-child(1) {
+  top: 20%;
+  left: 20%;
+  animation-delay: 0s;
+}
+
+.sparkle-effect:nth-child(2) {
+  top: 80%;
+  right: 20%;
+  animation-delay: 0.5s;
+}
+
+.sparkle-effect:nth-child(3) {
+  top: 50%;
+  left: 80%;
+  animation-delay: 1s;
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* NFT icon animations */
+.nft-icon {
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.nft-visual:hover .nft-icon {
+  transform: scale(1.1) rotateZ(5deg);
+}
+
+/* Enhanced lock overlay */
+.lock-overlay {
+  backdrop-filter: blur(4px);
+  transition: all 0.3s ease;
+}
+
+.lock-overlay:hover {
+  backdrop-filter: blur(2px);
+}
+
+/* Tier indicator styles */
+.tier-indicator {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Cost hierarchy visual feedback */
+.cost-affordable {
+  border-color: #10b981;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+.cost-expensive {
+  border-color: #f59e0b;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+}
+
+.cost-premium {
+  border-color: #ef4444;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+}
+
+/* NFT marketplace enhancements */
+.nft-marketplace-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.nft-marketplace-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+  opacity: 0.3;
+}
+
+/* Responsive NFT grid */
+@media (max-width: 768px) {
+  .nft-card .flex {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .nft-visual {
+    width: 100%;
+    max-width: 120px;
+    margin: 0 auto;
   }
 }
