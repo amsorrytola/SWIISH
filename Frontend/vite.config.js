@@ -8,10 +8,47 @@ export default defineConfig({
     global: 'globalThis',
   },
   optimizeDeps: {
-    include: ['@walletconnect/sign-client', '@walletconnect/modal', '@walletconnect/utils']
+    include: [
+      '@walletconnect/sign-client', 
+      '@walletconnect/modal', 
+      '@walletconnect/utils',
+      '@walletconnect/types'
+    ]
   },
   server: {
     host: true,
-    port: 5173
+    port: 5173,
+    cors: true,
+    allowedHosts: [
+      'localhost',
+      '127.0.0.1',
+      '0.0.0.0',
+      '.ngrok.io',
+      '.ngrok-free.app',
+      '0b41-119-252-195-223.ngrok-free.app'
+    ]
+  },
+  preview: {
+    host: true,
+    port: 5173,
+    cors: true,
+    allowedHosts: [
+      'localhost',
+      '127.0.0.1',
+      '0.0.0.0',
+      '.ngrok.io',
+      '.ngrok-free.app',
+      '0b41-119-252-195-223.ngrok-free.app'
+    ]
+  },
+  build: {
+    rollupOptions: {
+      external: [],
+      output: {
+        manualChunks: {
+          walletconnect: ['@walletconnect/sign-client', '@walletconnect/modal']
+        }
+      }
+    }
   }
 })
