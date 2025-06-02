@@ -88,7 +88,7 @@ export const WalletConnectProvider = ({ children }) => {
         requiredNamespaces: {
           hathor: {
             chains: ["hathor:testnet"],
-            methods: ["htr_signWithAddress", "htr_sendNanoContractTx"],
+            methods: ["htr_signWithAddress", "htr_sendNanoContractTx" ],
             events: [],
           },
         },

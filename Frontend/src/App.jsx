@@ -54,18 +54,84 @@ const SwiishApp = () => {
 
   const addLiquidityFunc = async () => {
     console.log("Adding liquidity")
-    await sendTx({ method: "add_liquidity"});
+    await sendTxForLiquidity({ method: "add_liquidity" , args:[tola1]});
   }
 
-  const CONTRACT_ID ="00001ffdfe046cfb5f7e325244810f3f6678e6f97034a6fd448996c3a26fc7b4"
-  const TOKEN_ID = "00"
-  const sendTx = async ({ method, args = [] }) => {
-  
+  const claimNftFunc = async () => {
+    console.log("Claiming NFT") 
+    await sendTxForNFT({ method: "claim_nft"});
+  }
 
-  console.log(client)
-  console.log(session)
-  console.log(CONTRACT_ID)
-  console.log(TOKEN_ID)
+  const addSwiishFunc = async () => {
+    console.log("Adding SWiish")
+    await sendTxForAddSWiish({ method: "add_swiish_liquidity", args: [iswiish] });
+  }
+
+
+  const swap = async () => {
+    console.log("Swapping tokens")
+    await sendTxForSwap({ method: "swap" });
+  }
+
+  const CONTRACT_ID ="00000a490aa2b56d9d6a323e73fe34e977f17febb24985e84b5e5421d8b12dee"
+  const TOKEN_ID = "00"
+  const tola1 = "000002c7bd06e6b874ffcdf7c0a34782039496cc147a7dfbd46cb6ef56adf8ce"
+  const tola2 = "000001e4bd2c641e51e2612fed31ecf5bf1e1c13bfc2a460832b8d820898c78f"
+  const iswiish = "00000247f7cce90558b59450016d629dd0b008fc19a8f3663728e8a47d4f9ee2"
+  const uswiish = "0000025d3ece6918f49b561ff36631d84a96bc9516f9f069f397b7e659585655"
+
+  const sendTxForAddSWiish = async ({ method, args = [] }) => {
+
+  if (!client || !session) {
+    console.log("kuch gayab hai")
+    return
+  };
+
+  try {
+    const result = await client.request({
+      topic: session.topic,
+      chainId: "hathor:testnet",
+      request: {
+        method: "htr_sendNanoContractTx",
+        id: Date.now(),
+        jsonrpc: "2.0",
+        params: {
+          method,
+          nc_id: CONTRACT_ID,
+          actions: [
+            // {
+            //   type: "withdrawal",
+            //   token: tola2,
+            //   amount: 1000.
+            // },
+            {
+              type: "deposit",
+              token: iswiish,
+              amount: 1000,
+            },
+            // {
+            //   type : "deposit",
+            //   token : TOKEN_ID,
+            //   amount : 3
+            // },
+            // {
+            //   type : "withdrawal",
+            //   token : iswiish,
+            //   amount : 1000
+            // }
+          ],
+          args,
+          push_tx: true,
+        },
+      },
+    });
+    console.log(`✅ ${method} called successfully:`, result);
+  } catch (error) {
+    console.error(`❌ Error calling ${method}:`, error);
+  }
+};
+
+  const sendTxForLiquidity = async ({ method, args = [] }) => {
 
   if (!client || !session) {
     console.log("kuch gayab hai")
@@ -85,10 +151,127 @@ const SwiishApp = () => {
           nc_id: CONTRACT_ID,
           actions: [
             {
+              type: "withdraw",
+              token: tola2,
+              amount: 1000.
+            },
+            {
               type: "deposit",
-              token: TOKEN_ID,
-              amount: 10,
+              token: tola1,
+              amount: 1000,
+            },
+            // {
+            //   type : "deposit",
+            //   token : TOKEN_ID,
+            //   amount : 3
+            // },
+            {
+              type : "withdrawal",
+              token : iswiish,
+              amount : 10000
             }
+          ],
+          args,
+          push_tx: true,
+        },
+      },
+    });
+    console.log(`✅ ${method} called successfully:`, result);
+  } catch (error) {
+    console.error(`❌ Error calling ${method}:`, error);
+  }
+};
+
+const sendTxForSwap = async ({ method, args = [] }) => {
+
+  if (!client || !session) {
+    console.log("kuch gayab hai")
+    return
+  };
+
+  try {
+    const result = await client.request({
+      topic: session.topic,
+      chainId: "hathor:testnet",
+      request: {
+        method: "htr_sendNanoContractTx",
+        id: Date.now(),
+        jsonrpc: "2.0",
+        params: {
+          method,
+          nc_id: CONTRACT_ID,
+          actions: [
+            {
+              type: "withdrawal",
+              token: tola2,
+              amount: 1000.
+            },
+            {
+              type: "deposit",
+              token: tola1,
+              amount: 1000,
+            },
+            {
+              type : "deposit",
+              token : TOKEN_ID,
+              amount : 3
+            },
+            {
+              type : "withdrawal",
+              token : uswiish,
+              amount : 100
+            }
+          ],
+          args,
+          push_tx: true,
+        },
+      },
+    });
+    console.log(`✅ ${method} called successfully:`, result);
+  } catch (error) {
+    console.error(`❌ Error calling ${method}:`, error);
+  }
+};
+
+const sendTxForNFT = async ({ method, args = [] }) => {
+
+  if (!client || !session) {
+    console.log("kuch gayab hai")
+    return
+  };
+
+  try {
+    const result = await client.request({
+      topic: session.topic,
+      chainId: "hathor:testnet",
+      request: {
+        method: "htr_sendNanoContractTx",
+        id: Date.now(),
+        jsonrpc: "2.0",
+        params: {
+          method,
+          nc_id: CONTRACT_ID,
+          actions: [
+            {
+              type: "withdrawal",
+              token: "0000009485b421a85fb5fb8215ed81ec34834055090e28c3d12207b6305669e5",
+              amount: 100.
+            }
+            // {
+            //   type: "deposit",
+            //   token: tola1,
+            //   amount: 1000,
+            // },
+            // {
+            //   type : "deposit",
+            //   token : TOKEN_ID,
+            //   amount : 3
+            // },
+            // {
+            //   type : "withdrawal",
+            //   token : uswiish,
+            //   amount : 100
+            // }
           ],
           args,
           push_tx: true,
@@ -1219,7 +1402,7 @@ const SwiishApp = () => {
           )}
 
           <button
-            onClick={handleSwap}
+            onClick={swap}
             disabled={!swapData.fromAmount || swapLoading}
             className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 sm:py-4 rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -1385,7 +1568,7 @@ const SwiishApp = () => {
                 )}
                 
                 <button
-                  onClick={handleAddLiquidity}
+                  onClick={addLiquidityFunc}
                   disabled={!liquidityData.amountA || addLiquidityLoading || !liquidityQuote}
                   className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -1608,7 +1791,7 @@ const SwiishApp = () => {
               </div>
 
               <button
-                onClick={() => handleNFTRedeem(nft.id, nft.cost)}
+                onClick={claimNftFunc}
                 disabled={(user?.loyaltyPoints || 0) < nft.cost || nft.remaining === 0}
                 className={`w-full py-3 rounded-lg font-medium transition-colors ${
                   (user?.loyaltyPoints || 0) >= nft.cost && nft.remaining > 0
