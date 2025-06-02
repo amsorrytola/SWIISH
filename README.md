@@ -105,4 +105,16 @@ SWIISH is an on-chain liquidity pool that lets users deposit two arbitrary token
       token_b: 0,
   }
 
+---
+
+#Blueprint
+
+- **production**
+  [   https://explorer.hackaton.hathor.network/blueprint/detail/000001ca887b0df1792d92ade8e45b19432b97ce74bb8a0d230762d17b883cec
+](https://explorer.hackaton.hathor.network/blueprint/detail/000001ca887b0df1792d92ade8e45b19432b97ce74bb8a0d230762d17b883cec)
+  
+
+-**demo**
+[   https://explorer.hackaton.hathor.network/blueprint/detail/0000002c636d5a6bd344d213ca4fc91ddfdcd352319c4fc8c522b83fc2030d58
+](https://explorer.hackaton.hathor.network/blueprint/detail/0000002c636d5a6bd344d213ca4fc91ddfdcd352319c4fc8c522b83fc2030d58)
 
