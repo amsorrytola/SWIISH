@@ -572,7 +572,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
       
       const fallbackPools = [
         { 
-          id: 1,
+          id: 6,
           pair: 'ETH/USD',
           tokenA: 'ETH',
           tokenB: 'USDT',
@@ -648,7 +648,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
           priceB: 2300.34
         },
         { 
-          id: 6,
+          id: 1,
           pair: 'Tola1/Tola2',
           tokenA: 'Tola1',
           tokenB: 'Tola2',

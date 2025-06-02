@@ -7,8 +7,27 @@ export class SwapService {
 
   initializePools() {
     return [
-      {
+      { 
         id: 1,
+        pair: 'Tola1/Tola2',
+        tokenA: 'Tola1',
+        tokenB: 'Tola2',
+        reserveA: 10,
+        reserveB: 10,
+        apy: 12.5, 
+        tvl: 5750865,
+        myLiquidity: 0,
+        myLPTokens: 0,
+        totalLPTokens: 50000,
+        swiishRewards: 100,
+        participants: 1247,
+        volume24h: 156000,
+        fee: 0.3,
+        priceA: 1.00,
+        priceB: 1.00
+      },
+      {
+        id: 6,
         pair: 'ETH/USDT',
         tokenA: 'ETH',
         tokenB: 'USDT',
