@@ -151,7 +151,7 @@ const SwiishApp = () => {
           nc_id: CONTRACT_ID,
           actions: [
             {
-              type: "withdraw",
+              type: "withdrawal",
               token: tola2,
               amount: 1000.
             },
@@ -219,7 +219,7 @@ const sendTxForSwap = async ({ method, args = [] }) => {
             {
               type : "withdrawal",
               token : uswiish,
-              amount : 100
+              amount : 1000
             }
           ],
           args,
@@ -287,8 +287,8 @@ const sendTxForNFT = async ({ method, args = [] }) => {
 
   
   const [swapData, setSwapData] = useState({
-    fromToken: 'ETH',
-    toToken: 'USDT',
+    fromToken: 'Tola1',
+    toToken: 'Tola2',
     fromAmount: '',
     toAmount: '',
     slippage: 0.5
@@ -568,7 +568,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
       const fallbackPools = [
         { 
           id: 1,
-          pair: 'ETH/USDT',
+          pair: 'ETH/USD',
           tokenA: 'ETH',
           tokenB: 'USDT',
           reserveA: 1250.75,
@@ -641,6 +641,25 @@ const sendTxForNFT = async ({ method, args = [] }) => {
           fee: 0.3,
           priceA: 67500,
           priceB: 2300.34
+        },
+        { 
+          id: 6,
+          pair: 'Tola1/Tola2',
+          tokenA: 'Tola1',
+          tokenB: 'Tola2',
+          reserveA: 10,
+          reserveB: 10,
+          apy: 12.5, 
+          tvl: 5750865,
+          myLiquidity: 0,
+          myLPTokens: 0,
+          totalLPTokens: 50000,
+          swiishRewards: 100,
+          participants: 1247,
+          volume24h: 156000,
+          fee: 0.3,
+          priceA: 1.00,
+          priceB: 1.00
         },
         {
           id: 5,
@@ -1237,10 +1256,10 @@ const sendTxForNFT = async ({ method, args = [] }) => {
 
     try {
       const quote = {
-        outputAmount: parseFloat(swapData.fromAmount) * 1825.5,
+        outputAmount: parseFloat(swapData.fromAmount),
         priceImpact: 0.15,
         fee: parseFloat(swapData.fromAmount) * 0.003,
-        minimumReceived: parseFloat(swapData.fromAmount) * 1825.5 * 0.995
+        minimumReceived: parseFloat(swapData.fromAmount)
       };
 
       setSwapQuote(quote);
@@ -1318,6 +1337,8 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                 onChange={(e) => setSwapData({ ...swapData, fromToken: e.target.value })}
                 className="bg-white dark:bg-gray-600 rounded-lg px-2 sm:px-3 py-2 border border-gray-200 dark:border-gray-600 font-medium text-sm sm:text-base text-gray-900 dark:text-white"
               >
+                <option>Tola1</option>
+                <option>Tola2</option>
                 <option>ETH</option>
                 <option>USDT</option>
                 <option>HTR</option>
@@ -1363,6 +1384,8 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                 onChange={(e) => setSwapData({ ...swapData, toToken: e.target.value })}
                 className="bg-white dark:bg-gray-600 rounded-lg px-2 sm:px-3 py-2 border border-gray-200 dark:border-gray-600 font-medium text-sm sm:text-base text-gray-900 dark:text-white"
               >
+                <option>Tola1</option>
+                <option>Tola2</option>
                 <option>USDT</option>
                 <option>ETH</option>
                 <option>HTR</option>
@@ -1392,7 +1415,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600 dark:text-gray-400">Fee:</span>
-                <span className="text-gray-900 dark:text-gray-100">{swapQuote.fee.toFixed(6)} {swapData.fromToken}</span>
+                <span className="text-gray-900 dark:text-gray-100">{swapQuote.fee.toFixed(6)} HTR</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600 dark:text-gray-400">SWIISH Reward:</span>
