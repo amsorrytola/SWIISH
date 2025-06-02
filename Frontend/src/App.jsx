@@ -716,41 +716,147 @@ const sendTxForNFT = async ({ method, args = [] }) => {
       ];
 
       const fallbackNfts = [
+        // User DAO NFTs
         { 
           id: 1, 
-          tier: 'Bronze', 
-          utility: '5% fee reduction + Basic analytics', 
-          cost: 100,
-          supply: 1000,
-          remaining: 847,
-          benefits: ['5% trading fee reduction', 'Basic portfolio analytics', 'Weekly market reports']
+          tier: 'Enter DAO NFT', 
+          type: 'user',
+          utility: '5% fee reduction + Basic voting rights', 
+          cost: 50,
+          supply: 2000,
+          remaining: 1247,
+          benefits: ['5% trading fee reduction', 'Basic DAO voting rights', 'Community access', 'Weekly reports'],
+          description: 'Your entry into the SWIISH User DAO community',
+          rarity: 'Common',
+          powerLevel: 1,
+          image: '/images/nfts/user-enter-dao.png'
         },
         { 
           id: 2, 
-          tier: 'Silver', 
-          utility: '10% fee reduction + Priority support + Advanced analytics', 
-          cost: 250,
-          supply: 500,
-          remaining: 312,
-          benefits: ['10% trading fee reduction', 'Priority customer support', 'Advanced analytics dashboard', 'Early feature access']
+          tier: 'Experienced Member NFT', 
+          type: 'user',
+          utility: '10% fee reduction + Enhanced voting + Priority support', 
+          cost: 150,
+          supply: 1000,
+          remaining: 687,
+          benefits: ['10% trading fee reduction', 'Enhanced voting power', 'Priority customer support', 'Advanced analytics dashboard'],
+          description: 'For seasoned SWIISH community members',
+          rarity: 'Uncommon',
+          powerLevel: 2,
+          image: '/images/nfts/user-experienced-member.png'
         },
         { 
           id: 3, 
-          tier: 'Gold', 
-          utility: '15% fee reduction + Exclusive pools + Premium features', 
-          cost: 500,
-          supply: 200,
-          remaining: 89,
-          benefits: ['15% trading fee reduction', 'Access to exclusive liquidity pools', 'Premium trading features', 'Monthly strategy calls']
+          tier: 'Super Member NFT', 
+          type: 'user',
+          utility: '15% fee reduction + Premium features + Exclusive pools', 
+          cost: 300,
+          supply: 500,
+          remaining: 289,
+          benefits: ['15% trading fee reduction', 'Access to exclusive pools', 'Premium trading features', 'Monthly strategy calls'],
+          description: 'Elite status in the SWIISH ecosystem',
+          rarity: 'Rare',
+          powerLevel: 3,
+          image: '/images/nfts/user-super-member.png'
         },
         { 
           id: 4, 
-          tier: 'Platinum', 
+          tier: 'Legendary Member NFT', 
+          type: 'user',
           utility: '20% fee reduction + All benefits + Governance boost', 
+          cost: 500,
+          supply: 200,
+          remaining: 89,
+          benefits: ['20% trading fee reduction', 'All premium benefits', '2x governance voting power', 'Direct team access'],
+          description: 'Legendary status with maximum user benefits',
+          rarity: 'Epic',
+          powerLevel: 4,
+          image: '/images/nfts/user-legendary-member.png'
+        },
+        { 
+          id: 5, 
+          tier: 'Ultimate Member NFT', 
+          type: 'user',
+          utility: '25% fee reduction + Ultimate power + Alpha access', 
           cost: 1000,
-          supply: 50,
+          supply: 100,
+          remaining: 34,
+          benefits: ['25% trading fee reduction', 'Ultimate governance power', 'Alpha feature access', 'Personal account manager'],
+          description: 'The pinnacle of SWIISH User DAO membership',
+          rarity: 'Legendary',
+          powerLevel: 5,
+          image: '/images/nfts/user-ultimate-member.png'
+        },
+        // Investor DAO NFTs
+        { 
+          id: 6, 
+          tier: 'Enter DAO NFT', 
+          type: 'investor',
+          utility: 'Basic liquidity mining + 10% reward boost', 
+          cost: 100,
+          supply: 1000,
+          remaining: 567,
+          benefits: ['10% liquidity mining boost', 'Investor DAO voting rights', 'Exclusive investor channels', 'Market insights'],
+          description: 'Your entry into the SWIISH Investor DAO',
+          rarity: 'Common',
+          powerLevel: 1,
+          image: '/images/nfts/investor-enter-dao.png'
+        },
+        { 
+          id: 7, 
+          tier: 'Experienced Member NFT', 
+          type: 'investor',
+          utility: 'Enhanced mining + 20% boost + Priority allocations', 
+          cost: 300,
+          supply: 500,
+          remaining: 234,
+          benefits: ['20% liquidity mining boost', 'Priority in new pools', 'Advanced market analytics', 'Private investor calls'],
+          description: 'For experienced DeFi investors',
+          rarity: 'Uncommon',
+          powerLevel: 2,
+          image: '/images/nfts/investor-experienced-member.png'
+        },
+        { 
+          id: 8, 
+          tier: 'Super Member NFT', 
+          type: 'investor',
+          utility: 'Premium mining + 30% boost + Exclusive opportunities', 
+          cost: 750,
+          supply: 250,
+          remaining: 89,
+          benefits: ['30% liquidity mining boost', 'Exclusive investment opportunities', 'Yield farming optimization', 'Personal DeFi advisor'],
+          description: 'Super investor status with premium benefits',
+          rarity: 'Rare',
+          powerLevel: 3,
+          image: '/images/nfts/investor-super-member.png'
+        },
+        { 
+          id: 9, 
+          tier: 'Legendary Member NFT', 
+          type: 'investor',
+          utility: 'Elite mining + 40% boost + Governance power', 
+          cost: 1500,
+          supply: 100,
           remaining: 23,
-          benefits: ['20% trading fee reduction', 'All premium benefits', '2x governance voting power', 'Direct team access']
+          benefits: ['40% liquidity mining boost', 'Major governance influence', 'Early access to new protocols', 'Revenue sharing participation'],
+          description: 'Legendary investor with significant influence',
+          rarity: 'Epic',
+          powerLevel: 4,
+          image: '/images/nfts/investor-legendary-member.png'
+        },
+        { 
+          id: 10, 
+          tier: 'Ultimate Member NFT', 
+          type: 'investor',
+          utility: 'Ultimate mining + 50% boost + Maximum power', 
+          cost: 3000,
+          supply: 50,
+          remaining: 7,
+          benefits: ['50% liquidity mining boost', 'Maximum governance power', 'Protocol co-ownership benefits', 'Executive advisory board access'],
+          description: 'The ultimate SWIISH Investor DAO membership',
+          rarity: 'Legendary',
+          powerLevel: 5,
+          image: '/images/nfts/investor-ultimate-member.png'
         }
       ];
 
@@ -1739,102 +1845,268 @@ const sendTxForNFT = async ({ method, args = [] }) => {
     );
   };
 
-  const renderNFTTab = () => (
-    <div className="space-y-6">
-      {/* NFT Stats */}
-      <div className="grid grid-cols-2 gap-4">
-        <StatCard icon={Trophy} label="NFTs Owned" value={user?.nftCount || 0} color="orange" />
-        <StatCard icon={Gift} label="Current Tier" value={user?.nftTier || 'None'} color="purple" />
-      </div>
-      
-      <div className="grid grid-cols-2 gap-4">
-        <StatCard icon={Zap} label="Available Points" value={user?.loyaltyPoints || 0} color="blue" />
-        <StatCard icon={Settings} label="Fee Reduction" value={
-          user?.nftTier === 'Platinum' ? '20%' :
-          user?.nftTier === 'Gold' ? '15%' :
-          user?.nftTier === 'Silver' ? '10%' :
-          user?.nftTier === 'Bronze' ? '5%' : '0%'
-        } color="green" />
-      </div>
+  const renderNFTTab = () => {
+    const getRarityColor = (rarity) => {
+      switch (rarity) {
+        case 'Common': return 'from-gray-400 to-gray-600';
+        case 'Uncommon': return 'from-green-400 to-green-600';
+        case 'Rare': return 'from-blue-400 to-blue-600';
+        case 'Epic': return 'from-purple-400 to-purple-600';
+        case 'Legendary': return 'from-yellow-400 to-yellow-600';
+        default: return 'from-gray-400 to-gray-600';
+      }
+    };
 
-      {/* NFT Marketplace */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-        <div className="p-6 border-b border-gray-100 dark:border-gray-700">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Utility NFT Marketplace</h2>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Unlock governance power and exclusive benefits</p>
+    const getPowerStars = (powerLevel) => {
+      return '★'.repeat(powerLevel) + '☆'.repeat(5 - powerLevel);
+    };
+
+    const userNfts = nfts?.filter(nft => nft.type === 'user') || [];
+    const investorNfts = nfts?.filter(nft => nft.type === 'investor') || [];
+
+    return (
+      <div className="space-y-6">
+        {/* NFT Stats */}
+        <div className="grid grid-cols-2 gap-4">
+          <StatCard icon={Trophy} label="NFTs Owned" value={user?.nftCount || 0} color="orange" />
+          <StatCard icon={Gift} label="Current Tier" value={user?.nftTier || 'None'} color="purple" />
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4">
+          <StatCard icon={Zap} label="Available Points" value={user?.loyaltyPoints || 0} color="blue" />
+          <StatCard icon={Settings} label="Fee Reduction" value={
+            user?.nftTier === 'Ultimate Member NFT' ? '25%' :
+            user?.nftTier === 'Legendary Member NFT' ? '20%' :
+            user?.nftTier === 'Super Member NFT' ? '15%' :
+            user?.nftTier === 'Experienced Member NFT' ? '10%' :
+            user?.nftTier === 'Enter DAO NFT' ? '5%' : '0%'
+          } color="green" />
         </div>
 
-        <div className="grid grid-cols-1 gap-4 p-6">
-          {nfts && nfts.length > 0 ? nfts.map((nft) => (
-            <div key={nft.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-lg transition-all">
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div
-                      className={`w-12 h-12 rounded-lg bg-gradient-to-br ${
-                        nft.tier === 'Bronze'
-                          ? 'from-orange-400 to-orange-600'
-                          : nft.tier === 'Silver'
-                          ? 'from-gray-400 to-gray-600'
-                          : nft.tier === 'Gold'
-                          ? 'from-yellow-400 to-yellow-600'
-                          : 'from-purple-400 to-pink-600'
-                      } flex items-center justify-center`}
-                    >
-                      <Trophy className="text-white" size={20} />
+        {/* User DAO NFTs */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+          <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <Users className="text-white" size={20} />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">User DAO NFTs</h2>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">Community governance and trading benefits</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 p-6">
+            {userNfts.length > 0 ? userNfts.map((nft) => (
+              <div key={nft.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-lg transition-all bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex gap-4 flex-1">
+                    {/* NFT Image */}
+                    <div className="flex-shrink-0 relative">
+                      <img
+                        src={`/images/nfts/user-${nft.tier.toLowerCase().replace(/\s+/g, '-').replace('nft', '').trim()}.png`}
+                        alt={nft.tier}
+                        className="w-20 h-20 rounded-lg object-cover border-2 border-gray-200 dark:border-gray-600"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextElementSibling.style.display = 'flex';
+                        }}
+                      />
+                      <div 
+                        className={`w-20 h-20 rounded-lg bg-gradient-to-br ${getRarityColor(nft.rarity)} items-center justify-center hidden absolute top-0 left-0`}
+                      >
+                        <Trophy className="text-white" size={24} />
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-bold text-lg text-gray-900 dark:text-white">{nft.tier} NFT</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-500">
-                        {nft.remaining}/{nft.supply} remaining
-                      </p>
+
+                    {/* NFT Details */}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div>
+                          <h3 className="font-bold text-lg text-gray-900 dark:text-white">{nft.tier}</h3>
+                          <div className="flex items-center gap-2">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              nft.rarity === 'Legendary' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-200' :
+                              nft.rarity === 'Epic' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-200' :
+                              nft.rarity === 'Rare' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200' :
+                              nft.rarity === 'Uncommon' ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200' :
+                              'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-200'
+                            }`}>
+                              {nft.rarity}
+                            </span>
+                            <span className="text-sm text-yellow-500 font-mono">
+                              {getPowerStars(nft.powerLevel)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{nft.description}</p>
+                      
+                      <div className="mb-3">
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Benefits:</p>
+                        <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                          {nft.benefits && nft.benefits.map((benefit, idx) => (
+                            <li key={idx} className="flex items-center gap-2">
+                              <div className="w-1 h-1 bg-blue-500 rounded-full"></div>
+                              {benefit}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-500">
+                        <span>Supply: {nft.supply}</span>
+                        <span>Remaining: {nft.remaining}</span>
+                        <span>Power Level: {nft.powerLevel}/5</span>
+                      </div>
                     </div>
                   </div>
                   
-                  <div className="mb-3">
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Benefits:</p>
-                    <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-                      {nft.benefits && nft.benefits.map((benefit, idx) => (
-                        <li key={idx} className="flex items-center gap-2">
-                          <div className="w-1 h-1 bg-purple-500 rounded-full"></div>
-                          {benefit}
-                        </li>
-                      ))}
-                    </ul>
+                  <div className="text-right ml-4">
+                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{nft.cost}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-500">points</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                      You have: {user?.loyaltyPoints || 0}
+                    </p>
                   </div>
                 </div>
-                
-                <div className="text-right ml-4">
-                  <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{nft.cost}</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">points</p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                    You have: {user?.loyaltyPoints || 0}
-                  </p>
-                </div>
-              </div>
 
-              <button
-                onClick={claimNftFunc}
-                disabled={(user?.loyaltyPoints || 0) < nft.cost || nft.remaining === 0}
-                className={`w-full py-3 rounded-lg font-medium transition-colors ${
-                  (user?.loyaltyPoints || 0) >= nft.cost && nft.remaining > 0
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg'
-                    : 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-300 cursor-not-allowed'
-                }`}
-              >
-                {nft.remaining === 0 ? 'Sold Out' : 
-                 (user?.loyaltyPoints || 0) >= nft.cost ? 'Redeem NFT' : 'Insufficient Points'}
-              </button>
+                <button
+                  onClick={() => claimNftFunc()}
+                  disabled={(user?.loyaltyPoints || 0) < nft.cost || nft.remaining === 0}
+                  className={`w-full py-3 rounded-lg font-medium transition-colors ${
+                    (user?.loyaltyPoints || 0) >= nft.cost && nft.remaining > 0
+                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:shadow-lg'
+                      : 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-300 cursor-not-allowed'
+                  }`}
+                >
+                  {nft.remaining === 0 ? 'Sold Out' : 
+                   (user?.loyaltyPoints || 0) >= nft.cost ? 'Redeem NFT' : 'Insufficient Points'}
+                </button>
+              </div>
+            )) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500 dark:text-gray-400">Loading User DAO NFTs...</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Investor DAO NFTs */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+          <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-600 rounded-lg flex items-center justify-center">
+                <TrendingUp className="text-white" size={20} />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Investor DAO NFTs</h2>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">Liquidity mining boosts and governance power</p>
+              </div>
             </div>
-          )) : (
-            <div className="text-center py-8">
-              <p className="text-gray-500 dark:text-gray-400">Loading NFT marketplace...</p>
-            </div>
-          )}
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 p-6">
+            {investorNfts.length > 0 ? investorNfts.map((nft) => (
+              <div key={nft.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-lg transition-all bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex gap-4 flex-1">
+                    {/* NFT Image */}
+                    <div className="flex-shrink-0 relative">
+                      <img
+                        src={`/images/nfts/investor-${nft.tier.toLowerCase().replace(/\s+/g, '-').replace('nft', '').trim()}.png`}
+                        alt={nft.tier}
+                        className="w-20 h-20 rounded-lg object-cover border-2 border-gray-200 dark:border-gray-600"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextElementSibling.style.display = 'flex';
+                        }}
+                      />
+                      <div 
+                        className={`w-20 h-20 rounded-lg bg-gradient-to-br ${getRarityColor(nft.rarity)} items-center justify-center hidden absolute top-0 left-0`}
+                      >
+                        <Trophy className="text-white" size={24} />
+                      </div>
+                    </div>
+
+                    {/* NFT Details */}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div>
+                          <h3 className="font-bold text-lg text-gray-900 dark:text-white">{nft.tier}</h3>
+                          <div className="flex items-center gap-2">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              nft.rarity === 'Legendary' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-200' :
+                              nft.rarity === 'Epic' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-200' :
+                              nft.rarity === 'Rare' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200' :
+                              nft.rarity === 'Uncommon' ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200' :
+                              'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-200'
+                            }`}>
+                              {nft.rarity}
+                            </span>
+                            <span className="text-sm text-yellow-500 font-mono">
+                              {getPowerStars(nft.powerLevel)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{nft.description}</p>
+                      
+                      <div className="mb-3">
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Benefits:</p>
+                        <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                          {nft.benefits && nft.benefits.map((benefit, idx) => (
+                            <li key={idx} className="flex items-center gap-2">
+                              <div className="w-1 h-1 bg-green-500 rounded-full"></div>
+                              {benefit}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-500">
+                        <span>Supply: {nft.supply}</span>
+                        <span>Remaining: {nft.remaining}</span>
+                        <span>Power Level: {nft.powerLevel}/5</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="text-right ml-4">
+                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">{nft.cost}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-500">points</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                      You have: {user?.loyaltyPoints || 0}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => claimNftFunc()}
+                  disabled={(user?.loyaltyPoints || 0) < nft.cost || nft.remaining === 0}
+                  className={`w-full py-3 rounded-lg font-medium transition-colors ${
+                    (user?.loyaltyPoints || 0) >= nft.cost && nft.remaining > 0
+                      ? 'bg-gradient-to-r from-green-500 to-teal-600 text-white hover:shadow-lg'
+                      : 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-300 cursor-not-allowed'
+                  }`}
+                >
+                  {nft.remaining === 0 ? 'Sold Out' : 
+                   (user?.loyaltyPoints || 0) >= nft.cost ? 'Redeem NFT' : 'Insufficient Points'}
+                </button>
+              </div>
+            )) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500 dark:text-gray-400">Loading Investor DAO NFTs...</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderProfileTab = () => (
     <div className="space-y-6">
