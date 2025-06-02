@@ -2236,8 +2236,18 @@ const sendTxForNFT = async ({ method, args = [] }) => {
             <h3 className="font-bold">Investor DAO</h3>
           </div>
           <p className="text-2xl font-bold">{user?.swiishTokens || 0}</p>
-          <p className="text-sm opacity-90">SWIISH Tokens</p>
-          <p className="text-xs opacity-75 mt-1">Liquidity providers govern yield distribution</p>
+          <div className='flex items-center justify-between gap-2'>
+            <div>
+              <p className="text-sm opacity-90">SWIISH Tokens</p>
+              <p className="text-xs opacity-75 mt-1">Liquidity providers govern yield distribution</p>
+            </div>
+            <button
+              onClick={() => alert('Investor DAO features coming soon!')}
+              className="mt-2 bg-white/20 text-white py-1 px-3 rounded-lg text-xs hover:bg-white/30 transition-colors"
+            >
+              Join Investor DAO
+            </button>
+          </div>
         </div>
         
         <div className="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl p-4 text-white">
@@ -2246,8 +2256,18 @@ const sendTxForNFT = async ({ method, args = [] }) => {
             <h3 className="font-bold">User DAO</h3>
           </div>
           <p className="text-2xl font-bold">{user?.loyaltyPoints || 0}</p>
+          <div className='flex items-center justify-between gap-2'>
+            <div>
           <p className="text-sm opacity-90">Loyalty Points</p>
           <p className="text-xs opacity-75 mt-1">Power users vote on app features</p>
+          </div>
+            <button
+              onClick={() => alert('User DAO features coming soon!')}
+              className="mt-2 bg-white/20 text-white py-1 px-3 rounded-lg text-xs hover:bg-white/30 transition-colors"
+            >
+              Join User DAO
+            </button>
+          </div>
         </div>
       </div>
 
