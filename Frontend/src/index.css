@@ -2,12 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom CSS Variables */
+/* Custom CSS Variables - Pure Black and White Only */
 :root {
   --vh: 1vh;
+  --color-bg: #ffffff;
+  --color-text: #000000;
+  --color-border: #000000;
+  --color-muted: #000000;
 }
 
-/* Base styles */
+/* Base styles - Pure Minimalist */
 html {
   font-size: 14px;
 }
@@ -21,12 +25,13 @@ html {
 body {
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-weight: 400;
 }
 
 /* Telegram WebApp specific styles */
@@ -36,95 +41,77 @@ body {
   overflow: hidden;
 }
 
-/* Custom scrollbar for dark mode */
-.dark ::-webkit-scrollbar {
-  width: 4px;
-}
-
-.dark ::-webkit-scrollbar-track {
-  @apply bg-gray-800;
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  @apply bg-gray-600 rounded-full;
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-500;
-}
-
-/* Light mode scrollbar */
+/* Pure black and white scrollbar */
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 1px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gray-100;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 rounded-full;
+  background: var(--color-text);
+  border-radius: 0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400;
+  background: var(--color-text);
 }
 
-/* Smooth transitions */
+/* No transitions - Pure minimal */
 * {
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  transition: none !important;
 }
 
-/* Input focus styles */
+/* Sharp, clean focus */
 input:focus, select:focus, textarea:focus {
-  outline: none;
-  @apply ring-2 ring-purple-500 ring-opacity-50;
+  outline: 1px solid var(--color-text);
+  outline-offset: 0;
 }
 
-/* Button animations */
+/* No button animations */
 button {
-  transition: all 0.2s ease;
+  transition: none !important;
 }
 
 button:active {
-  transform: scale(0.98);
+  transform: none;
 }
 
-/* Safe area padding for mobile devices */
-@supports (padding: max(0px)) {
-  .safe-area-top {
-    padding-top: max(1rem, env(safe-area-inset-top));
-  }
-  
-  .safe-area-bottom {
-    padding-bottom: max(1rem, env(safe-area-inset-bottom));
-  }
+/* Remove safe area padding - keep it clean */
+.safe-area-top {
+  padding-top: 0;
 }
 
-/* Responsive text sizes */
+.safe-area-bottom {
+  padding-bottom: 0;
+}
+
+/* Fixed text sizes - no responsive scaling */
 .text-responsive {
-  font-size: clamp(0.875rem, 2.5vw, 1rem);
+  font-size: 0.875rem;
 }
 
 .text-responsive-lg {
-  font-size: clamp(1rem, 3vw, 1.25rem);
+  font-size: 1rem;
 }
 
 .text-responsive-xl {
-  font-size: clamp(1.25rem, 4vw, 1.5rem);
+  font-size: 1.25rem;
 }
 
-/* Animation classes */
+/* Remove all animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 1; }
+  to { opacity: 1; }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.3s ease-out;
+  animation: none;
 }
 
-/* Mobile-first responsive grid */
+/* Simple grid */
 .responsive-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -141,4 +128,275 @@ button:active {
   .responsive-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+}
+
+/* Pure minimalist utilities */
+.minimal-border {
+  border: 1px solid var(--color-text);
+}
+
+.minimal-shadow {
+  box-shadow: none;
+}
+
+/* Remove hover effects */
+.minimal-hover:hover {
+  background-color: inherit;
+  color: inherit;
+}
+
+/* Pure black and white buttons - NO hover changes */
+.minimal-button {
+  background-color: var(--color-text);
+  color: var(--color-bg);
+  border: 1px solid var(--color-text);
+  transition: none !important;
+}
+
+.minimal-button:hover {
+  background-color: var(--color-text);
+  color: var(--color-bg);
+}
+
+/* Clean card styling */
+.minimal-card {
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-text);
+  border-radius: 0;
+}
+
+/* Sharp typography */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  color: var(--color-text) !important;
+  margin: 0;
+}
+
+/* Clean form elements */
+input, select, textarea {
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-text);
+  color: var(--color-text);
+  border-radius: 0;
+}
+
+/* Override all gradient classes */
+.bg-gradient-to-r,
+.bg-gradient-to-l,
+.bg-gradient-to-t,
+.bg-gradient-to-b,
+.bg-gradient-to-br,
+.bg-gradient-to-bl,
+.bg-gradient-to-tr,
+.bg-gradient-to-tl {
+  background: var(--color-text) !important;
+  color: var(--color-bg) !important;
+}
+
+/* Override ALL text color classes to pure black/white */
+.text-purple-500,
+.text-purple-600,
+.text-purple-400,
+.text-purple-300,
+.text-purple-200,
+.text-purple-100,
+.text-blue-500,
+.text-blue-600,
+.text-blue-404,
+.text-blue-303,
+.text-blue-200,
+.text-blue-100,
+.text-green-500,
+.text-green-600,
+.text-green-404,
+.text-green-303,
+.text-green-202,
+.text-green-101,
+.text-red-500,
+.text-red-600,
+.text-red-404,
+.text-red-303,
+.text-red-202,
+.text-red-101,
+.text-yellow-500,
+.text-yellow-600,
+.text-yellow-404,
+.text-yellow-303,
+.text-yellow-202,
+.text-yellow-101,
+.text-orange-500,
+.text-orange-600,
+.text-orange-404,
+.text-orange-303,
+.text-orange-202,
+.text-orange-101,
+.text-pink-500,
+.text-pink-600,
+.text-pink-404,
+.text-pink-303,
+.text-pink-202,
+.text-pink-101,
+.text-cyan-500,
+.text-cyan-600,
+.text-cyan-404,
+.text-cyan-303,
+.text-cyan-202,
+.text-cyan-101 {
+  color: var(--color-text) !important;
+}
+
+/* Override ALL background color classes to pure black/white */
+.bg-purple-500,
+.bg-purple-600,
+.bg-purple-404,
+.bg-purple-303,
+.bg-purple-200,
+.bg-purple-100,
+.bg-blue-500,
+.bg-blue-600,
+.bg-blue-404,
+.bg-blue-303,
+.bg-blue-200,
+.bg-blue-100,
+.bg-green-500,
+.bg-green-600,
+.bg-green-404,
+.bg-green-303,
+.bg-green-202,
+.bg-green-101,
+.bg-red-500,
+.bg-red-600,
+.bg-red-404,
+.bg-red-303,
+.bg-red-202,
+.bg-red-101,
+.bg-yellow-500,
+.bg-yellow-600,
+.bg-yellow-404,
+.bg-yellow-303,
+.bg-yellow-202,
+.bg-yellow-101,
+.bg-orange-500,
+.bg-orange-600,
+.bg-orange-404,
+.bg-orange-303,
+.bg-orange-202,
+.bg-orange-101,
+.bg-pink-500,
+.bg-pink-600,
+.bg-pink-404,
+.bg-pink-303,
+.bg-pink-202,
+.bg-pink-101,
+.bg-cyan-500,
+.bg-cyan-600,
+.bg-cyan-404,
+.bg-cyan-303,
+.bg-cyan-202,
+.bg-cyan-101 {
+  background-color: var(--color-text) !important;
+  color: var(--color-bg) !important;
+}
+
+/* Override light background colors */
+.bg-purple-50,
+.bg-blue-50,
+.bg-green-50,
+.bg-red-50,
+.bg-yellow-50,
+.bg-orange-50,
+.bg-pink-50,
+.bg-cyan-50,
+.bg-white {
+  background-color: var(--color-bg) !important;
+  color: var(--color-text) !important;
+}
+
+/* Force all text to be visible */
+p, span, div, label, a, li, td, th {
+  color: var(--color-text) !important;
+}
+
+/* Force all buttons to be visible - NO hover changes */
+button {
+  background-color: var(--color-text) !important;
+  color: var(--color-bg) !important;
+  border: 1px solid var(--color-text) !important;
+}
+
+button:hover {
+  background-color: var(--color-text) !important;
+  color: var(--color-bg) !important;
+  border: 1px solid var(--color-text) !important;
+}
+
+/* COMPLETELY remove ALL hover effects */
+*:hover {
+  background-color: inherit !important;
+  color: inherit !important;
+  transform: none !important;
+  box-shadow: none !important;
+  border-color: inherit !important;
+}
+
+/* Navbar specific overrides to ensure white text */
+.bg-black h1,
+.bg-black p,
+.bg-black span,
+.bg-black .text-white {
+  color: #ffffff !important;
+}
+
+/* Ensure navbar icons stay white */
+.bg-black svg {
+  color: #ffffff !important;
+}
+
+/* NO hover effects on navbar items */
+.bg-black *:hover {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+/* Remove ALL hover effects from all interactive elements */
+button:hover,
+a:hover,
+div:hover,
+span:hover,
+p:hover,
+.hover\:bg-black:hover,
+.hover\:text-white:hover,
+.hover\:bg-white:hover,
+.hover\:text-black:hover,
+.hover\:bg-gray-50:hover,
+.hover\:bg-gray-700:hover,
+.hover\:shadow-lg:hover,
+.hover\:bg-blue-600:hover,
+.hover\:bg-red-600:hover,
+.hover\:bg-green-600:hover,
+.hover\:bg-orange-600:hover,
+.hover\:bg-purple-600:hover,
+.transition-colors:hover {
+  background-color: inherit !important;
+  color: inherit !important;
+  box-shadow: none !important;
+  transform: none !important;
+  border-color: inherit !important;
+}
+
+/* Override Tailwind hover classes */
+.hover\:bg-blue-500:hover,
+.hover\:bg-blue-600:hover,
+.hover\:bg-red-500:hover,
+.hover\:bg-red-600:hover,
+.hover\:bg-green-500:hover,
+.hover\:bg-green-600:hover,
+.hover\:bg-orange-500:hover,
+.hover\:bg-orange-600:hover,
+.hover\:bg-purple-500:hover,
+.hover\:bg-purple-600:hover,
+.hover\:bg-gray-500:hover,
+.hover\:bg-gray-600:hover {
+  background-color: inherit !important;
+  color: inherit !important;
 }

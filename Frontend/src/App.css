@@ -1,42 +1,65 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff;
+  color: #000000;
 }
 
+/* Remove all decorative elements */
 .logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+  display: none;
 }
 
 .card {
-  padding: 2em;
+  background: transparent;
+  border: none;
+  padding: 0;
+  box-shadow: none;
+  border-radius: 0;
 }
 
+/* Sharp focus states */
+*:focus-visible {
+  outline: 1px solid #000000;
+  outline-offset: 0;
+  border-radius: 0;
+}
+
+/* Remove any remaining decorative elements */
 .read-the-docs {
-  color: #888;
+  color: #000000;
+  text-decoration: none;
+}
+
+/* Override any animation classes */
+@keyframes logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(0deg); }
+}
+
+/* Force all elements to be sharp and minimal */
+* {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Pure black and white only - no hover changes */
+button {
+  background-color: #000000;
+  color: #ffffff;
+  border: 1px solid #000000;
+}
+
+button:hover {
+  background-color: #000000;
+  color: #ffffff;
+  border: 1px solid #000000;
+}
+
+/* Remove all hover effects globally */
+*:hover {
+  background-color: inherit !important;
+  color: inherit !important;
 }

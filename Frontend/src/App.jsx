@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Wallet, Coins, Users, Zap, Trophy, Vote, TrendingUp, ArrowUpDown, Gift, Settings, ChevronRight, Plus, Minus, Moon, Sun, ExternalLink } from 'lucide-react';
+import { Wallet, Coins, Users, Zap, Trophy, Vote, TrendingUp, ArrowUpDown, Gift, Settings, ChevronRight, Plus, Minus, ExternalLink } from 'lucide-react';
 import {WalletConnectContext} from "./context/WalletConnectContext"
 
 // Create fallback services
@@ -48,7 +48,6 @@ const SwiishApp = () => {
   const [loading, setLoading] = useState(true);
   const [isTelegramWebApp, setIsTelegramWebApp] = useState(false);
   const [error, setError] = useState(null);
-  const [darkMode, setDarkMode] = useState(false);
   const [services, setServices] = useState(null);
   const {connectHathorWallet , client , account , session} = useContext(WalletConnectContext)
 
@@ -405,22 +404,6 @@ const sendTxForNFT = async ({ method, args = [] }) => {
       console.error('Wallet disconnect failed:', error);
     }
   };
-
-  useEffect(() => {
-    const savedDarkMode = localStorage.getItem('swiish_dark_mode');
-    const telegramDarkMode = window.Telegram?.WebApp?.colorScheme === 'dark';
-    
-    setDarkMode(savedDarkMode ? JSON.parse(savedDarkMode) : telegramDarkMode);
-  }, []);
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    localStorage.setItem('swiish_dark_mode', JSON.stringify(darkMode));
-  }, [darkMode]);
 
   useEffect(() => {
     if (!services) return;
@@ -1397,37 +1380,33 @@ const sendTxForNFT = async ({ method, args = [] }) => {
 
   const renderSwapTab = () => (
     <div className="space-y-4 sm:space-y-6">
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+      <div className="bg-white p-4 shadow-sm border border-black">
         <div className="flex justify-between items-center">
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white">External Wallet</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <h3 className="font-semibold text-black">External Wallet</h3>
+            <p className="text-sm text-black">
               {walletConnected ? `${walletAddress?.slice(0, 6)}...${walletAddress?.slice(-4)}` : 'Not connected'}
             </p>
             {walletConnected && (
-              <p className="text-xs text-gray-500 dark:text-gray-500">
+              <p className="text-xs text-black">
                 Balance: {parseFloat(walletBalance).toFixed(4)} ETH
               </p>
             )}
           </div>
           <button
             onClick={walletConnected ? disconnectWallet : connectWallet}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              walletConnected
-                ? 'bg-red-500 text-white hover:bg-red-600'
-                : 'bg-blue-500 text-white hover:bg-blue-600'
-            }`}
+            className="px-4 py-2 font-medium bg-black text-white border border-black"
           >
             {walletConnected ? 'Disconnect' : 'Connect Wallet'}
           </button>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+      <div className="bg-white p-4 sm:p-6 shadow-sm border border-black">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Token Swap</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-black">Token Swap</h2>
           {walletConnected && (
-            <span className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
+            <span className="flex items-center gap-1 text-sm text-black">
               <ExternalLink size={14} />
               External
             </span>
@@ -1435,10 +1414,10 @@ const sendTxForNFT = async ({ method, args = [] }) => {
         </div>
 
         <div className="space-y-4">
-          <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 sm:p-4">
+          <div className="bg-white border border-black p-3 sm:p-4">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-gray-600 dark:text-gray-400">From</span>
-              <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-500">
+              <span className="text-sm text-black">From</span>
+              <span className="text-xs sm:text-sm text-black">
                 Balance: {walletConnected ? walletBalance : '2.45'} {swapData.fromToken}
               </span>
             </div>
@@ -1446,7 +1425,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
               <select
                 value={swapData.fromToken}
                 onChange={(e) => setSwapData({ ...swapData, fromToken: e.target.value })}
-                className="bg-white dark:bg-gray-600 rounded-lg px-2 sm:px-3 py-2 border border-gray-200 dark:border-gray-600 font-medium text-sm sm:text-base text-gray-900 dark:text-white"
+                className="bg-white border border-black rounded-lg px-2 sm:px-3 py-2 font-medium text-sm sm:text-base text-black"
               >
                 <option>Tola1</option>
                 <option>Tola2</option>
@@ -1460,7 +1439,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                 placeholder="0.00"
                 value={swapData.fromAmount}
                 onChange={(e) => setSwapData({ ...swapData, fromAmount: e.target.value })}
-                className="flex-1 bg-transparent text-lg sm:text-xl font-semibold outline-none text-gray-900 dark:text-white placeholder-gray-400"
+                className="flex-1 bg-transparent text-lg sm:text-xl font-semibold outline-none text-black placeholder-gray-400"
               />
             </div>
           </div>
@@ -1476,16 +1455,16 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                   toAmount: swapData.fromAmount
                 })
               }
-              className="p-2 bg-purple-500 rounded-full text-white hover:bg-purple-600 transition-colors"
+              className="p-2 bg-black text-white border border-black"
             >
               <ArrowUpDown size={20} />
             </button>
           </div>
 
-          <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 sm:p-4">
+          <div className="bg-white border border-black p-3 sm:p-4">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-gray-600 dark:text-gray-400">To</span>
-              <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-500">
+              <span className="text-sm text-black">To</span>
+              <span className="text-xs sm:text-sm text-black">
                 Balance: 1,250 {swapData.toToken}
               </span>
             </div>
@@ -1493,7 +1472,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
               <select
                 value={swapData.toToken}
                 onChange={(e) => setSwapData({ ...swapData, toToken: e.target.value })}
-                className="bg-white dark:bg-gray-600 rounded-lg px-2 sm:px-3 py-2 border border-gray-200 dark:border-gray-600 font-medium text-sm sm:text-base text-gray-900 dark:text-white"
+                className="bg-white border border-black rounded-lg px-2 sm:px-3 py-2 font-medium text-sm sm:text-base text-black"
               >
                 <option>Tola1</option>
                 <option>Tola2</option>
@@ -1507,7 +1486,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                 placeholder="0.00"
                 value={swapData.toAmount}
                 readOnly
-                className="flex-1 bg-transparent text-lg sm:text-xl font-semibold outline-none text-gray-500 dark:text-gray-400"
+                className="flex-1 bg-transparent text-lg sm:text-xl font-semibold outline-none text-black placeholder-gray-400"
               />
             </div>
           </div>
@@ -1515,7 +1494,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
           {swapQuote && (
             <div className="bg-blue-50 dark:bg-blue-900/50 rounded-lg p-3 sm:p-4 space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">Price Impact:</span>
+                <span className="text-black">Price Impact:</span>
                 <span
                   className={`font-medium ${
                     swapQuote.priceImpact > 5 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'
@@ -1525,11 +1504,11 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">Fee:</span>
-                <span className="text-gray-900 dark:text-gray-100">{swapQuote.fee.toFixed(6)} HTR</span>
+                <span className="text-black">Fee:</span>
+                <span className="text-black">{swapQuote.fee.toFixed(6)} HTR</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">SWIISH Reward:</span>
+                <span className="text-black">SWIISH Reward:</span>
                 <span className="text-purple-600 dark:text-purple-400 font-medium">+10 SWIISH</span>
               </div>
             </div>
@@ -1538,13 +1517,11 @@ const sendTxForNFT = async ({ method, args = [] }) => {
           <button
             onClick={swap}
             disabled={!swapData.fromAmount || swapLoading}
-            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 sm:py-4 rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-black text-white py-3 sm:py-4 font-semibold border border-black disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {swapLoading ? 'Swapping...' : walletConnected ? 'Swap (External)' : 'Swap (Internal)'}
           </button>
-          <button
-            onClick={addLiquidityFunc}
-          >
+          <button onClick={addLiquidityFunc}>
             transact
           </button>
         </div>
@@ -1566,35 +1543,35 @@ const sendTxForNFT = async ({ method, args = [] }) => {
 
     return (
       <div className="space-y-6">
-        {/* Governance Power Display */}
-        <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-6 text-white">
-          <h3 className="text-lg font-bold mb-2">Your Liquidity Stats</h3>
+        {/* Governance Power Display - White background */}
+        <div className="bg-white p-6 text-black border border-black">
+          <h3 className="text-lg font-bold mb-2 text-black">Your Liquidity Stats</h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-sm opacity-90">Total Liquidity</p>
-              <p className="text-xl font-bold">${(user?.totalLiquidity || 0).toLocaleString()}</p>
+              <p className="text-sm text-black">Total Liquidity</p>
+              <p className="text-xl font-bold text-black">${(user?.totalLiquidity || 0).toLocaleString()}</p>
             </div>
             <div>
-              <p className="text-sm opacity-90">SWIISH Earned</p>
-              <p className="text-xl font-bold">{(user?.swiishTokens || 0).toFixed(2)}</p>
+              <p className="text-sm text-black">SWIISH Earned</p>
+              <p className="text-xl font-bold text-black">{(user?.swiishTokens || 0).toFixed(2)}</p>
             </div>
           </div>
-          <div className="mt-3 pt-3 border-t border-white/20">
-            <p className="text-sm opacity-90">Investor DAO Power</p>
-            <p className="text-2xl font-bold">{(user?.investorDAOPower || 0).toFixed(1)}</p>
+          <div className="mt-3 pt-3 border-t border-black">
+            <p className="text-sm text-black">Investor DAO Power</p>
+            <p className="text-2xl font-bold text-black">{(user?.investorDAOPower || 0).toFixed(1)}</p>
           </div>
         </div>
 
         {/* Add Liquidity Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-          <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">Add Liquidity</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+        <div className="bg-white p-6 shadow-sm border border-black">
+          <h3 className="text-lg font-bold mb-4 text-black">Add Liquidity</h3>
+          <p className="text-sm text-black mb-4">
             Provide liquidity to earn trading fees and SWIISH rewards. Based on Uniswap V2 AMM model.
           </p>
           
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-black mb-2">
                 Select Pool
               </label>
               <select
@@ -1611,7 +1588,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                   });
                   setLiquidityQuote(null);
                 }}
-                className="w-full bg-white dark:bg-gray-600 rounded-lg px-3 py-2 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
+                className="w-full bg-white dark:bg-gray-600 rounded-lg px-3 py-2 border border-black text-black"
                 disabled={addLiquidityLoading}
               >
                 <option value="">Choose a pool...</option>
@@ -1627,7 +1604,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
               <>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-black mb-2">
                       {liquidityData.tokenA} Amount
                     </label>
                     <input
@@ -1645,16 +1622,16 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                           setLiquidityData(prev => ({ ...prev, amountB: '' }));
                         }
                       }}
-                      className="w-full bg-white dark:bg-gray-600 rounded-lg px-3 py-2 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
+                      className="w-full bg-white dark:bg-gray-600 rounded-lg px-3 py-2 border border-black text-black"
                       disabled={addLiquidityLoading}
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-black mt-1">
                       Price: ${(liquidityData.selectedPool.priceA || 0).toLocaleString()}
                     </p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-black mb-2">
                       {liquidityData.tokenB} Amount
                     </label>
                     <input
@@ -1662,9 +1639,9 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                       placeholder="0.0"
                       value={liquidityData.amountB}
                       readOnly
-                      className="w-full bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2 border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400"
+                      className="w-full bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2 border border-black text-black"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-black mt-1">
                       Price: ${(liquidityData.selectedPool.priceB || 0).toLocaleString()}
                     </p>
                   </div>
@@ -1672,24 +1649,24 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                 
                 {liquidityQuote && (
                   <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 space-y-2">
-                    <h4 className="font-medium text-gray-900 dark:text-white">Liquidity Details</h4>
+                    <h4 className="font-medium text-black">Liquidity Details</h4>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <p className="text-gray-600 dark:text-gray-400">LP Tokens:</p>
+                        <p className="text-black">LP Tokens:</p>
                         <p className="font-medium">{liquidityQuote.lpTokens}</p>
                       </div>
                       <div>
-                        <p className="text-gray-600 dark:text-gray-400">Pool Share:</p>
+                        <p className="text-black">Pool Share:</p>
                         <p className="font-medium">{liquidityQuote.poolShare}%</p>
                       </div>
                       <div>
-                        <p className="text-gray-600 dark:text-gray-400">Price Impact:</p>
+                        <p className="text-black">Price Impact:</p>
                         <p className={`font-medium ${parseFloat(liquidityQuote.priceImpact) > 1 ? 'text-orange-600' : 'text-green-600'}`}>
                           {liquidityQuote.priceImpact}%
                         </p>
                       </div>
                       <div>
-                        <p className="text-gray-600 dark:text-gray-400">Current Ratio:</p>
+                        <p className="text-black">Current Ratio:</p>
                         <p className="font-medium">1:{liquidityQuote.currentPrice}</p>
                       </div>
                     </div>
@@ -1704,7 +1681,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                 <button
                   onClick={addLiquidityFunc}
                   disabled={!liquidityData.amountA || addLiquidityLoading || !liquidityQuote}
-                  className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-black text-white py-3 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {addLiquidityLoading ? 'Adding Liquidity...' : 'Add Liquidity'}
                 </button>
@@ -1714,13 +1691,13 @@ const sendTxForNFT = async ({ method, args = [] }) => {
         </div>
 
         {/* Liquidity Pools */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-          <div className="p-6 border-b border-gray-100 dark:border-gray-700">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Liquidity Pools</h2>
-            <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">AMM pools powered by Hathor Nano Contracts</p>
+        <div className="bg-white shadow-sm border border-black">
+          <div className="p-6 border-b border-black">
+            <h2 className="text-xl font-bold text-black">Liquidity Pools</h2>
+            <p className="text-black text-sm mt-1">AMM pools powered by Hathor Nano Contracts</p>
           </div>
 
-          <div className="divide-y divide-gray-100 dark:divide-gray-700">
+          <div className="divide-y divide-black">
             {pools.map((pool) => {
               // Add safety checks for each pool
               const safePool = {
@@ -1742,19 +1719,19 @@ const sendTxForNFT = async ({ method, args = [] }) => {
               };
 
               return (
-                <div key={safePool.id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <div key={safePool.id} className="p-6 bg-white">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-semibold text-gray-900 dark:text-white text-lg">{safePool.pair}</h3>
-                        <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs font-medium">
+                        <h3 className="font-semibold text-black text-lg">{safePool.pair}</h3>
+                        <span className="bg-white text-black px-2 py-1 text-xs font-medium border border-black">
                           {safePool.fee}% Fee
                         </span>
                       </div>
                       
-                      <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-400">
+                      <div className="grid grid-cols-2 gap-4 text-sm text-black">
                         <div>
-                          <p>APY: <span className="text-green-600 dark:text-green-400 font-medium">{safePool.apy}%</span></p>
+                          <p>APY: <span className="text-black font-medium">{safePool.apy}%</span></p>
                           <p>TVL: <span className="font-medium">${safePool.tvl.toLocaleString()}</span></p>
                           <p>24h Volume: <span className="font-medium">${safePool.volume24h.toLocaleString()}</span></p>
                         </div>
@@ -1767,14 +1744,14 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                     </div>
                     
                     <div className="text-right ml-4">
-                      <p className="font-semibold text-gray-900 dark:text-white">${safePool.myLiquidity.toLocaleString()}</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">My Liquidity</p>
+                      <p className="font-semibold text-black">${safePool.myLiquidity.toLocaleString()}</p>
+                      <p className="text-sm text-black">My Liquidity</p>
                       {safePool.myLPTokens > 0 && (
                         <>
-                          <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                          <p className="text-xs text-black mt-1">
                             {safePool.myLPTokens.toFixed(4)} LP tokens
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-black">
                             {((safePool.myLPTokens / safePool.totalLPTokens) * 100).toFixed(4)}% of pool
                           </p>
                         </>
@@ -1796,7 +1773,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                         setLiquidityQuote(null);
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
-                      className="flex-1 min-w-0 bg-blue-500 text-white py-2 px-3 rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                      className="flex-1 min-w-0 bg-black text-white py-2 px-3"
                       disabled={addLiquidityLoading}
                     >
                       Add Liquidity
@@ -1806,21 +1783,21 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                       <>
                         <button 
                           onClick={() => handleRemoveLiquidity(safePool, 25)}
-                          className="bg-orange-500 text-white py-2 px-3 rounded-lg hover:bg-orange-600 transition-colors text-sm"
+                          className="bg-black text-white py-2 px-3 text-sm"
                           disabled={removeLiquidityLoading}
                         >
                           Remove 25%
                         </button>
                         <button 
                           onClick={() => handleRemoveLiquidity(safePool, 50)}
-                          className="bg-red-500 text-white py-2 px-3 rounded-lg hover:bg-red-600 transition-colors text-sm"
+                          className="bg-black text-white py-2 px-3 text-sm"
                           disabled={removeLiquidityLoading}
                         >
                           Remove 50%
                         </button>
                         <button 
                           onClick={() => handleRemoveLiquidity(safePool, 100)}
-                          className="bg-gray-500 text-white py-2 px-3 rounded-lg hover:bg-gray-600 transition-colors text-sm"
+                          className="bg-black text-white py-2 px-3 text-sm"
                           disabled={removeLiquidityLoading}
                         >
                           Remove All
@@ -1835,7 +1812,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                           setUser(updatedUser);
                           alert(`Harvested ${safePool.swiishRewards} SWIISH tokens!`);
                         }}
-                        className="bg-purple-500 text-white py-2 px-3 rounded-lg hover:bg-purple-600 transition-colors text-sm"
+                        className="bg-black text-white py-2 px-3 text-sm"
                       >
                         Harvest ({safePool.swiishRewards})
                       </button>
@@ -1888,23 +1865,23 @@ const sendTxForNFT = async ({ method, args = [] }) => {
           } color="green" />
         </div>
 
-        {/* User DAO NFTs */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-          <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+        {/* User DAO NFTs - White background */}
+        <div className="bg-white shadow-sm border border-black">
+          <div className="p-6 border-b border-black">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-black flex items-center justify-center">
                 <Users className="text-white" size={20} />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">User DAO NFTs</h2>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">Community governance and trading benefits</p>
+                <h2 className="text-xl font-bold text-black">User DAO NFTs</h2>
+                <p className="text-black text-sm">Community governance and trading benefits</p>
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4 p-6">
             {userNfts.length > 0 ? userNfts.map((nft) => (
-              <div key={nft.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-lg transition-all bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
+              <div key={nft.id} className="border border-black p-4 bg-white">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex gap-4 flex-1">
                     {/* NFT Image */}
@@ -1912,7 +1889,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                       <img
                         src={`/images/nfts/user-${nft.tier.toLowerCase().replace(/\s+/g, '-').replace('nft', '').trim()}.png`}
                         alt={nft.tier}
-                        className="w-20 h-20 rounded-lg object-cover border-2 border-gray-200 dark:border-gray-600"
+                        className="w-20 h-20 rounded-lg object-cover border-2 border-black"
                         onError={(e) => {
                           e.target.style.display = 'none';
                           e.target.nextElementSibling.style.display = 'flex';
@@ -1929,7 +1906,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <div>
-                          <h3 className="font-bold text-lg text-gray-900 dark:text-white">{nft.tier}</h3>
+                          <h3 className="font-bold text-lg text-black">{nft.tier}</h3>
                           <div className="flex items-center gap-2">
                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                               nft.rarity === 'Legendary' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-200' :
@@ -1947,11 +1924,11 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                         </div>
                       </div>
                       
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{nft.description}</p>
+                      <p className="text-sm text-black mb-3">{nft.description}</p>
                       
                       <div className="mb-3">
-                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Benefits:</p>
-                        <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                        <p className="text-sm font-medium text-black mb-2">Benefits:</p>
+                        <ul className="text-xs text-black space-y-1">
                           {nft.benefits && nft.benefits.map((benefit, idx) => (
                             <li key={idx} className="flex items-center gap-2">
                               <div className="w-1 h-1 bg-blue-500 rounded-full"></div>
@@ -1961,7 +1938,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                         </ul>
                       </div>
 
-                      <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-500">
+                      <div className="flex items-center gap-4 text-xs text-black">
                         <span>Supply: {nft.supply}</span>
                         <span>Remaining: {nft.remaining}</span>
                         <span>Power Level: {nft.powerLevel}/5</span>
@@ -1970,9 +1947,9 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                   </div>
                   
                   <div className="text-right ml-4">
-                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{nft.cost}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-500">points</p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                    <p className="text-2xl font-bold text-blue-600">{nft.cost}</p>
+                    <p className="text-sm text-black">points</p>
+                    <p className="text-xs text-black mt-1">
                       You have: {user?.loyaltyPoints || 0}
                     </p>
                   </div>
@@ -1981,10 +1958,10 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                 <button
                   onClick={() => claimNftFunc()}
                   disabled={(user?.loyaltyPoints || 0) < nft.cost || nft.remaining === 0}
-                  className={`w-full py-3 rounded-lg font-medium transition-colors ${
+                  className={`w-full py-3 font-medium ${
                     (user?.loyaltyPoints || 0) >= nft.cost && nft.remaining > 0
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:shadow-lg'
-                      : 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-300 cursor-not-allowed'
+                      ? 'bg-black text-white'
+                      : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                   }`}
                 >
                   {nft.remaining === 0 ? 'Sold Out' : 
@@ -1993,29 +1970,29 @@ const sendTxForNFT = async ({ method, args = [] }) => {
               </div>
             )) : (
               <div className="text-center py-8">
-                <p className="text-gray-500 dark:text-gray-400">Loading User DAO NFTs...</p>
+                <p className="text-black">Loading User DAO NFTs...</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Investor DAO NFTs */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-          <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+        {/* Investor DAO NFTs - White background */}
+        <div className="bg-white shadow-sm border border-black">
+          <div className="p-6 border-b border-black">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-600 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-black flex items-center justify-center">
                 <TrendingUp className="text-white" size={20} />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Investor DAO NFTs</h2>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">Liquidity mining boosts and governance power</p>
+                <h2 className="text-xl font-bold text-black">Investor DAO NFTs</h2>
+                <p className="text-black text-sm">Liquidity mining boosts and governance power</p>
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4 p-6">
             {investorNfts.length > 0 ? investorNfts.map((nft) => (
-              <div key={nft.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-lg transition-all bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20">
+              <div key={nft.id} className="border border-black p-4 bg-white">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex gap-4 flex-1">
                     {/* NFT Image */}
@@ -2023,7 +2000,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                       <img
                         src={`/images/nfts/investor-${nft.tier.toLowerCase().replace(/\s+/g, '-').replace('nft', '').trim()}.png`}
                         alt={nft.tier}
-                        className="w-20 h-20 rounded-lg object-cover border-2 border-gray-200 dark:border-gray-600"
+                        className="w-20 h-20 rounded-lg object-cover border-2 border-black"
                         onError={(e) => {
                           e.target.style.display = 'none';
                           e.target.nextElementSibling.style.display = 'flex';
@@ -2040,7 +2017,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <div>
-                          <h3 className="font-bold text-lg text-gray-900 dark:text-white">{nft.tier}</h3>
+                          <h3 className="font-bold text-lg text-black">{nft.tier}</h3>
                           <div className="flex items-center gap-2">
                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                               nft.rarity === 'Legendary' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-200' :
@@ -2058,11 +2035,11 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                         </div>
                       </div>
                       
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{nft.description}</p>
+                      <p className="text-sm text-black mb-3">{nft.description}</p>
                       
                       <div className="mb-3">
-                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Benefits:</p>
-                        <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                        <p className="text-sm font-medium text-black mb-2">Benefits:</p>
+                        <ul className="text-xs text-black space-y-1">
                           {nft.benefits && nft.benefits.map((benefit, idx) => (
                             <li key={idx} className="flex items-center gap-2">
                               <div className="w-1 h-1 bg-green-500 rounded-full"></div>
@@ -2072,7 +2049,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                         </ul>
                       </div>
 
-                      <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-500">
+                      <div className="flex items-center gap-4 text-xs text-black">
                         <span>Supply: {nft.supply}</span>
                         <span>Remaining: {nft.remaining}</span>
                         <span>Power Level: {nft.powerLevel}/5</span>
@@ -2081,9 +2058,9 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                   </div>
                   
                   <div className="text-right ml-4">
-                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">{nft.cost}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-500">points</p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                    <p className="text-2xl font-bold text-green-600">{nft.cost}</p>
+                    <p className="text-sm text-black">points</p>
+                    <p className="text-xs text-black mt-1">
                       You have: {user?.loyaltyPoints || 0}
                     </p>
                   </div>
@@ -2092,10 +2069,10 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                 <button
                   onClick={() => claimNftFunc()}
                   disabled={(user?.loyaltyPoints || 0) < nft.cost || nft.remaining === 0}
-                  className={`w-full py-3 rounded-lg font-medium transition-colors ${
+                  className={`w-full py-3 font-medium ${
                     (user?.loyaltyPoints || 0) >= nft.cost && nft.remaining > 0
-                      ? 'bg-gradient-to-r from-green-500 to-teal-600 text-white hover:shadow-lg'
-                      : 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-300 cursor-not-allowed'
+                      ? 'bg-black text-white'
+                      : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                   }`}
                 >
                   {nft.remaining === 0 ? 'Sold Out' : 
@@ -2104,7 +2081,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
               </div>
             )) : (
               <div className="text-center py-8">
-                <p className="text-gray-500 dark:text-gray-400">Loading Investor DAO NFTs...</p>
+                <p className="text-black">Loading Investor DAO NFTs...</p>
               </div>
             )}
           </div>
@@ -2115,9 +2092,9 @@ const sendTxForNFT = async ({ method, args = [] }) => {
 
   const renderProfileTab = () => (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl p-6 text-white">
+      <div className="bg-black p-6 text-white">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+          <div className="w-16 h-16 bg-white/20 flex items-center justify-center">
             <span className="text-2xl font-bold">{user?.username?.charAt(0).toUpperCase()}</span>
           </div>
           <div>
@@ -2159,24 +2136,24 @@ const sendTxForNFT = async ({ method, args = [] }) => {
         />
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-        <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">Recent Activity</h3>
+      <div className="bg-white p-6 shadow-sm border border-black">
+        <h3 className="text-lg font-bold mb-4 text-black">Recent Activity</h3>
         <div className="space-y-3">
           <div className="flex justify-between items-center py-2">
-            <span className="text-gray-600 dark:text-gray-400">Token swap completed</span>
+            <span className="text-black">Token swap completed</span>
             <span className="text-green-600 dark:text-green-400 font-medium">+10 SWIISH</span>
           </div>
           <div className="flex justify-between items-center py-2">
-            <span className="text-gray-600 dark:text-gray-400">Voted on proposal #001</span>
+            <span className="text-black">Voted on proposal #001</span>
             <span className="text-blue-600 dark:text-blue-400 font-medium">+10 Points</span>
           </div>
           <div className="flex justify-between items-center py-2">
-            <span className="text-gray-600 dark:text-gray-400">Liquidity staked</span>
+            <span className="text-black">Liquidity staked</span>
             <span className="text-purple-600 dark:text-purple-400 font-medium">+25 SWIISH</span>
           </div>
           {user?.nftCount > 0 && (
             <div className="flex justify-between items-center py-2">
-              <span className="text-gray-600 dark:text-gray-400">Redeemed {user.nftTier} NFT</span>
+              <span className="text-black">Redeemed {user.nftTier} NFT</span>
               <span className="text-orange-600 dark:text-orange-400 font-medium">-{
                 user.nftTier === 'Bronze' ? '100' :
                 user.nftTier === 'Silver' ? '250' :
@@ -2187,39 +2164,29 @@ const sendTxForNFT = async ({ method, args = [] }) => {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-        <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">Wallet & Settings</h3>
+      <div className="bg-white p-6 shadow-sm border border-black">
+        <h3 className="text-lg font-bold mb-4 text-black">Wallet & Settings</h3>
         <div className="space-y-3">
           <button 
             onClick={walletConnected ? disconnectWallet : connectWallet}
-            className="w-full flex justify-between items-center py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg px-3"
+            className="w-full flex justify-between items-center py-3 text-left px-3 border border-black bg-white text-black"
           >
             <span>{walletConnected ? 'Disconnect External Wallet' : 'Connect External Wallet'}</span>
-            <ChevronRight size={20} className="text-gray-400 dark:text-gray-500" />
-          </button>
-          <button 
-            onClick={() => {
-              setDarkMode(!darkMode);
-              alert('Theme updated!');
-            }}
-            className="w-full flex justify-between items-center py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg px-3"
-          >
-            <span>Toggle Dark Mode</span>
-            <ChevronRight size={20} className="text-gray-400 dark:text-gray-500" />
+            <ChevronRight size={20} className="text-black" />
           </button>
           <button 
             onClick={() => alert('Notifications preferences coming soon!')}
-            className="w-full flex justify-between items-center py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg px-3"
+            className="w-full flex justify-between items-center py-3 text-left px-3 border border-black bg-white text-black"
           >
             <span>Notification Preferences</span>
-            <ChevronRight size={20} className="text-gray-400 dark:text-gray-500" />
+            <ChevronRight size={20} className="text-black" />
           </button>
           <button 
             onClick={() => alert('Security settings coming soon!')}
-            className="w-full flex justify-between items-center py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg px-3"
+            className="w-full flex justify-between items-center py-3 text-left px-3 border border-black bg-white text-black"
           >
             <span>Security Settings</span>
-            <ChevronRight size={20} className="text-gray-400 dark:text-gray-500" />
+            <ChevronRight size={20} className="text-black" />
           </button>
         </div>
       </div>
@@ -2230,7 +2197,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
     <div className="space-y-6">
       {/* DAO Overview */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl p-4 text-white">
+        <div className="bg-black p-4 text-white">
           <div className="flex items-center gap-2 mb-2">
             <Users size={20} />
             <h3 className="font-bold">Investor DAO</h3>
@@ -2243,14 +2210,14 @@ const sendTxForNFT = async ({ method, args = [] }) => {
             </div>
             <button
               onClick={() => alert('Investor DAO features coming soon!')}
-              className="mt-2 bg-white/20 text-white py-1 px-3 rounded-lg text-xs hover:bg-white/30 transition-colors"
+              className="mt-2 bg-white text-black py-1 px-3 text-xs"
             >
               Join Investor DAO
             </button>
           </div>
         </div>
         
-        <div className="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl p-4 text-white">
+        <div className="bg-black p-4 text-white">
           <div className="flex items-center gap-2 mb-2">
             <Vote size={20} />
             <h3 className="font-bold">User DAO</h3>
@@ -2258,12 +2225,12 @@ const sendTxForNFT = async ({ method, args = [] }) => {
           <p className="text-2xl font-bold">{user?.loyaltyPoints || 0}</p>
           <div className='flex items-center justify-between gap-2'>
             <div>
-          <p className="text-sm opacity-90">Loyalty Points</p>
-          <p className="text-xs opacity-75 mt-1">Power users vote on app features</p>
-          </div>
+              <p className="text-sm opacity-90">Loyalty Points</p>
+              <p className="text-xs opacity-75 mt-1">Power users vote on app features</p>
+            </div>
             <button
               onClick={() => alert('User DAO features coming soon!')}
-              className="mt-2 bg-white/20 text-white py-1 px-3 rounded-lg text-xs hover:bg-white/30 transition-colors"
+              className="mt-2 bg-white text-black py-1 px-3 text-xs"
             >
               Join User DAO
             </button>
@@ -2272,19 +2239,19 @@ const sendTxForNFT = async ({ method, args = [] }) => {
       </div>
 
       {/* Active Proposals */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-        <div className="p-6 border-b border-gray-100 dark:border-gray-700">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Active Governance Proposals</h2>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Shape the future of SWIISH</p>
+      <div className="bg-white shadow-sm border border-black">
+        <div className="p-6 border-b border-black">
+          <h2 className="text-xl font-bold text-black">Active Governance Proposals</h2>
+          <p className="text-black text-sm mt-1">Shape the future of SWIISH</p>
         </div>
 
-        <div className="divide-y divide-gray-100 dark:divide-gray-700">
+        <div className="divide-y divide-black">
           {proposals && proposals.length > 0 ? proposals.map((proposal) => (
             <div key={proposal.id} className="p-6">
               <div className="flex justify-between items-start mb-3">
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{proposal.title}</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{proposal.description}</p>
+                  <h3 className="font-semibold text-black mb-2">{proposal.title}</h3>
+                  <p className="text-sm text-black mb-3">{proposal.description}</p>
                   
                   <div className="flex gap-2 mb-2">
                     <span
@@ -2304,14 +2271,14 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                     </span>
                   </div>
                   
-                  <div className="text-xs text-gray-500 dark:text-gray-500">
+                  <div className="text-xs text-black">
                     Ends: {new Date(proposal.endsAt).toLocaleDateString()}
                   </div>
                 </div>
                 
                 <div className="text-right ml-4">
-                  <p className="font-semibold text-gray-900 dark:text-white">{proposal.votes}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">votes</p>
+                  <p className="font-semibold text-black">{proposal.votes}</p>
+                  <p className="text-sm text-black">votes</p>
                 </div>
               </div>
 
@@ -2333,7 +2300,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                         (proposal.dao === 'investor' && (user?.swiishTokens || 0) < proposal.requiredTokens) ||
                         (proposal.dao === 'user' && (user?.loyaltyPoints || 0) < proposal.requiredTokens)
                       }
-                      className="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 bg-black text-white py-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Vote Yes
                     </button>
@@ -2343,7 +2310,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                         (proposal.dao === 'investor' && (user?.swiishTokens || 0) < proposal.requiredTokens) ||
                         (proposal.dao === 'user' && (user?.loyaltyPoints || 0) < proposal.requiredTokens)
                       }
-                      className="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 bg-black text-white py-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Vote No
                     </button>
@@ -2353,7 +2320,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
             </div>
           )) : (
             <div className="text-center py-8">
-              <p className="text-gray-500 dark:text-gray-400">Loading DAO proposals...</p>
+              <p className="text-black">Loading DAO proposals...</p>
             </div>
           )}
         </div>
@@ -2363,22 +2330,22 @@ const sendTxForNFT = async ({ method, args = [] }) => {
 
   if (!services || loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-300">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-black mx-auto"></div>
+          <p className="mt-4 text-black">
             {!services ? 'Loading services...' : isTelegramWebApp ? 'Initializing your SWIISH experience...' : 'Loading SWIISH...'}
           </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+          <p className="text-sm text-black mt-2">
             Connection: {connectionStatus}
             {retryCount > 0 && ` (Retry ${retryCount})`}
           </p>
           {error && (
-            <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-800 rounded-lg max-w-md mx-auto">
-              <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
+            <div className="mt-4 p-4 bg-white border border-black max-w-md mx-auto">
+              <p className="text-black text-sm">{error}</p>
               <button 
                 onClick={handleRetry}
-                className="mt-2 bg-red-500 text-white px-4 py-2 rounded text-sm hover:bg-red-600"
+                className="mt-2 bg-black text-white px-4 py-2 text-sm border border-black"
               >
                 Retry Connection
               </button>
@@ -2391,17 +2358,17 @@ const sendTxForNFT = async ({ method, args = [] }) => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center p-8 max-w-md mx-auto">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Welcome to SWIISH</h1>
-          <div className="bg-blue-50 dark:bg-blue-900/50 p-4 rounded-lg mb-4">
-            <p className="text-sm text-blue-800 dark:text-blue-200">
+          <h1 className="text-2xl font-bold text-black mb-4">Welcome to SWIISH</h1>
+          <div className="bg-white border border-black p-4 mb-4">
+            <p className="text-sm text-black">
               <strong>Development Mode:</strong> Running in browser for testing
             </p>
           </div>
           <button 
             onClick={handleRetry}
-            className="bg-purple-500 text-white px-6 py-2 rounded-lg hover:bg-purple-600"
+            className="bg-black text-white px-6 py-2 border border-black"
           >
             Initialize App
           </button>
@@ -2413,10 +2380,10 @@ const sendTxForNFT = async ({ method, args = [] }) => {
   const TabButton = ({ id, icon: Icon, label, isActive, onClick }) => (
     <button
       onClick={() => onClick(id)}
-      className={`flex flex-col items-center p-2 sm:p-3 rounded-xl transition-all ${
+      className={`flex flex-col items-center p-2 sm:p-3 ${
         isActive
-          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-          : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+          ? 'bg-black text-white shadow-lg'
+          : 'bg-white text-black border border-black'
       }`}
     >
       <Icon size={18} className="sm:w-5 sm:h-5" />
@@ -2424,48 +2391,32 @@ const sendTxForNFT = async ({ method, args = [] }) => {
     </button>
   );
 
-  const StatCard = ({ icon: Icon, label, value, color = 'purple' }) => (
-    <div className="bg-white dark:bg-gray-800 rounded-xl p-3 sm:p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+  const StatCard = ({ icon: Icon, label, value, color = 'black' }) => (
+    <div className="bg-white p-3 sm:p-4 shadow-sm border border-black">
       <div className="flex items-center gap-2 sm:gap-3">
-        <div
-          className={`p-1.5 sm:p-2 rounded-lg bg-gradient-to-r ${
-            color === 'purple'
-              ? 'from-purple-500 to-pink-500'
-              : color === 'blue'
-              ? 'from-blue-500 to-cyan-500'
-              : color === 'green'
-              ? 'from-green-500 to-emerald-500'
-              : 'from-orange-500 to-red-500'
-          }`}
-        >
+        <div className="p-1.5 sm:p-2 bg-black">
           <Icon size={16} className="sm:w-5 sm:h-5 text-white" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm truncate">{label}</p>
-          <p className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">{value}</p>
+          <p className="text-black text-xs sm:text-sm truncate">{label}</p>
+          <p className="text-lg sm:text-xl font-bold text-black truncate">{value}</p>
         </div>
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-4 sticky top-0 z-10">
+    <div className="min-h-screen bg-white transition-colors">
+      <div className="bg-black text-white p-4 sticky top-0 z-10">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold">SWIISH</h1>
-            <p className="text-purple-100 text-xs sm:text-sm">DeFi in Telegram</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-white">SWIISH</h1>
+            <p className="text-white text-xs sm:text-sm">DeFi in Telegram</p>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
-            >
-              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
             <div className="flex items-center gap-1 sm:gap-2">
-              <Wallet size={16} className="sm:w-5 sm:h-5" />
-              <span className="font-medium text-sm sm:text-base">@{user?.username}</span>
+              <Wallet size={16} className="sm:w-5 sm:h-5 text-white" />
+              <span className="font-medium text-sm sm:text-base text-white">@{user?.username}</span>
             </div>
           </div>
         </div>
@@ -2479,7 +2430,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
         {activeTab === 'profile' && renderProfileTab()}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-2 sm:p-4">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-black p-2 sm:p-4">
         <div className="grid grid-cols-5 gap-1 sm:gap-2 max-w-md mx-auto">
           <TabButton
             id="swap"

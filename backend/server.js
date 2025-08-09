@@ -74,7 +74,7 @@ app.use((req, res, next) => {
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    'https://7bde-103-77-3-62.ngrok-free.app',
+    'https://4d62fda51520.ngrok-free.app/',
     'https://*.ngrok-free.app',
     'https://*.ngrok.io',
     'https://web.telegram.org',
