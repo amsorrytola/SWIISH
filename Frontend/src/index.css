@@ -384,9 +384,63 @@ p:hover,
   border-color: inherit !important;
 }
 
-/* Override Tailwind hover classes */
-.hover\:bg-blue-500:hover,
-.hover\:bg-blue-600:hover,
+/* Prevent ANY hover effects on the SWIISH header */
+.swiish-header,
+.swiish-header *,
+.swiish-header:hover,
+.swiish-header *:hover {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  transition: none !important;
+}
+
+/* Specific overrides for header elements */
+.swiish-header h1,
+.swiish-header h1:hover,
+.swiish-header p,
+.swiish-header p:hover,
+.swiish-header span,
+.swiish-header span:hover,
+.swiish-header svg,
+.swiish-header svg:hover {
+  color: #ffffff !important;
+  background-color: transparent !important;
+}
+
+/* Prevent ANY hover effects on the bottom tab navigation */
+.swiish-tab-nav,
+.swiish-tab-nav *,
+.swiish-tab-nav:hover,
+.swiish-tab-nav *:hover {
+  transition: none !important;
+}
+
+.swiish-tab-button,
+.swiish-tab-button *,
+.swiish-tab-button:hover,
+.swiish-tab-button *:hover {
+  transition: none !important;
+}
+
+/* Active tab button - force black background and white text */
+.swiish-tab-button.active,
+.swiish-tab-button.active:hover,
+.swiish-tab-button.active *,
+.swiish-tab-button.active *:hover {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+/* Inactive tab button - force white background and black text */
+.swiish-tab-button.inactive,
+.swiish-tab-button.inactive:hover,
+.swiish-tab-button.inactive *,
+.swiish-tab-button.inactive *:hover {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: none !important;
+}
+
 .hover\:bg-red-500:hover,
 .hover\:bg-red-600:hover,
 .hover\:bg-green-500:hover,

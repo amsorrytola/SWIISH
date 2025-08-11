@@ -222,6 +222,35 @@ class ApiService {
     });
   }
 
+  // Hierarchical DAO methods
+  async getVotingPower(telegramId, daoType) {
+    return this.request(`/dao/voting-power/${daoType}/${telegramId}`);
+  }
+
+  async getGovernanceHierarchy(daoType) {
+    return this.request(`/dao/hierarchy/${daoType}`);
+  }
+
+  async delegateVotingPower(delegationData) {
+    return this.request('/dao/delegate', {
+      method: 'POST',
+      body: JSON.stringify(delegationData),
+    });
+  }
+
+  async createHierarchicalProposal(proposalData) {
+    return this.request('/dao/hierarchical-proposal', {
+      method: 'POST',
+      body: JSON.stringify(proposalData),
+    });
+  }
+
+  async executeProposal(proposalId) {
+    return this.request(`/dao/execute/${proposalId}`, {
+      method: 'POST',
+    });
+  }
+
   // NFT methods
   async getNFTMarketplace() {
     return this.request('/nft/marketplace');
