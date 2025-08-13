@@ -329,6 +329,17 @@ const sendTxForNFT = async ({ method, args = [] }) => {
     votingPower: 0
   });
 
+  // Add hierarchical governance state
+  const [hierarchicalGovernance, setHierarchicalGovernance] = useState({
+    investorTier: 'observer',
+    userTier: 'observer',
+    investorVotingPower: 0,
+    userVotingPower: 0,
+    delegatedPower: 0,
+    canCreateProposals: false,
+    tierBenefits: []
+  });
+
   // Initialize services
   useEffect(() => {
     const initializeServices = async () => {
@@ -1281,102 +1292,213 @@ const sendTxForNFT = async ({ method, args = [] }) => {
     try {
       const proposal = proposals.find(p => p.id === proposalId);
       
-      if (daoType === 'investor' && user.swiishTokens < proposal.requiredTokens) {
-        alert(`You need at least ${proposal.requiredTokens} SWIISH tokens to vote on Investor DAO proposals.`);
-        return;
-      }
+      // Calculate hierarchical voting power
+      const votingPowerData = await calculateHierarchicalVotingPower(user, daoType);
       
-      if (daoType === 'user' && user.loyaltyPoints < proposal.requiredTokens) {
-        alert(`You need at least ${proposal.requiredTokens} loyalty points to vote on User DAO proposals.`);
+      if (!votingPowerData.canVote) {
+        alert(`Your ${daoType === 'investor' ? 'Investor' : 'User'} DAO tier (${votingPowerData.tier}) doesn't have voting rights. ${votingPowerData.requirements}`);
         return;
       }
 
+      if (daoType === 'investor' && votingPowerData.power < proposal.requiredTokens) {
+        alert(`You need at least ${proposal.requiredTokens} voting power to vote on this proposal. You have ${votingPowerData.power}.`);
+        return;
+      }
+      
+      if (daoType === 'user' && votingPowerData.power < proposal.requiredTokens) {
+        alert(`You need at least ${proposal.requiredTokens} voting power to vote on this proposal. You have ${votingPowerData.power}.`);
+        return;
+      }
+
+      // Submit hierarchical vote
+      const currentApiService = getApiService();
+      const voteResult = await currentApiService.vote({
+        proposalId,
+        vote,
+        daoType,
+        votingPower: votingPowerData.power,
+        tier: votingPowerData.tier,
+        multiplier: votingPowerData.multiplier
+      });
+
+      // Update proposals with weighted vote
       const updatedProposals = proposals.map(p => 
         p.id === proposalId 
-          ? { ...p, votes: p.votes + 1 }
+          ? { 
+              ...p, 
+              votes: p.votes + votingPowerData.power,
+              voteBreakdown: {
+                ...p.voteBreakdown,
+                [votingPowerData.tier]: (p.voteBreakdown?.[votingPowerData.tier] || 0) + votingPowerData.power
+              }
+            }
           : p
       );
       setProposals(updatedProposals);
 
-      const loyaltyReward = daoType === 'investor' ? 15 : 10;
+      // Update engagement metrics and rewards
+      await updateEngagementMetrics('vote');
+      
+      const loyaltyReward = calculateVoteReward(votingPowerData.tier, daoType);
       const updatedUser = { 
         ...user, 
         loyaltyPoints: (user.loyaltyPoints || 0) + loyaltyReward 
       };
       setUser(updatedUser);
 
-      alert(`Vote submitted successfully!\n+${loyaltyReward} loyalty points earned!\nThank you for participating in ${daoType === 'investor' ? 'Investor' : 'User'} DAO governance.`);
+      alert(`Hierarchical vote submitted successfully!\nVoting Power Used: ${votingPowerData.power}\nTier: ${votingPowerData.tier}\nReward: +${loyaltyReward} loyalty points\nThank you for participating in ${daoType === 'investor' ? 'Investor' : 'User'} DAO governance.`);
     } catch (error) {
-      console.error('Vote failed:', error);
+      console.error('Hierarchical vote failed:', error);
       alert('Vote failed: ' + error.message);
     }
   };
 
-  const handleNFTRedeem = async (nftId, cost) => {
-    if (!services) return;
-    
-    try {
-      if (user.loyaltyPoints < cost) {
-        alert('Insufficient loyalty points!');
-        return;
-      }
+  const calculateHierarchicalVotingPower = async (user, daoType) => {
+    if (daoType === 'investor') {
+      const swiishTokens = user.swiishTokens || 0;
+      const totalLiquidity = user.totalLiquidity || 0;
+      const nftPowerLevel = getNFTPowerLevel(user.nftTier, 'investor');
 
-      const nft = nfts.find(n => n.id === nftId);
+      const basePower = swiishTokens;
+      const liquidityBonus = Math.min(totalLiquidity * 0.1, swiishTokens * 0.5);
+      const nftMultiplier = 1 + (nftPowerLevel * 0.1);
+      const totalPower = Math.floor((basePower + liquidityBonus) * nftMultiplier);
       
-      const updatedUser = { 
-        ...user, 
-        loyaltyPoints: user.loyaltyPoints - cost,
-        nftCount: (user.nftCount || 0) + 1,
-        nftTier: nft.tier
+      const tier = getInvestorTier(totalPower, totalLiquidity);
+      const canVote = ['junior', 'standard', 'senior', 'major', 'whale'].includes(tier);
+      
+      return {
+        power: totalPower,
+        tier,
+        canVote,
+        multiplier: nftMultiplier,
+        breakdown: { basePower, liquidityBonus, nftMultiplier },
+        requirements: canVote ? '' : 'Minimum 100 voting power required'
       };
-      setUser(updatedUser);
+    } else {
+      const loyaltyPoints = user.loyaltyPoints || 0;
+      const swapCount = user.swapCount || 0;
+      const daoParticipation = user.daoParticipation || 0;
+      const nftPowerLevel = getNFTPowerLevel(user.nftTier, 'user');
 
-      const updatedNfts = nfts.map(n => 
-        n.id === nftId 
-          ? { ...n, remaining: n.remaining - 1 }
-          : n
-      );
-      setNfts(updatedNfts);
-
-      alert(`${nft.tier} NFT redeemed successfully!\n\nBenefits unlocked:\n${nft.benefits.map(b => `• ${b}`).join('\n')}`);
-    } catch (error) {
-      console.error('NFT redemption failed:', error);
-      alert('NFT redemption failed: ' + error.message);
-    }
-  };
-
-  const getSwapQuote = async () => {
-    if (!swapData.fromAmount || !services) return;
-
-    try {
-      const quote = {
-        outputAmount: parseFloat(swapData.fromAmount),
-        priceImpact: 0.15,
-        fee: parseFloat(swapData.fromAmount) * 0.003,
-        minimumReceived: parseFloat(swapData.fromAmount)
+      const basePower = loyaltyPoints;
+      const activityBonus = Math.min(swapCount * 2 + daoParticipation * 5, loyaltyPoints * 0.3);
+      const nftMultiplier = 1 + (nftPowerLevel * 0.05);
+      const totalPower = Math.floor((basePower + activityBonus) * nftMultiplier);
+      
+      const tier = getUserTier(totalPower, swapCount, daoParticipation);
+      const canVote = ['member', 'engaged', 'active', 'advocate', 'champion'].includes(tier);
+      
+      return {
+        power: totalPower,
+        tier,
+        canVote,
+        multiplier: nftMultiplier,
+        breakdown: { basePower, activityBonus, nftMultiplier },
+        requirements: canVote ? '' : 'Minimum 100 voting power required'
       };
-
-      setSwapQuote(quote);
-      setSwapData({ ...swapData, toAmount: quote.outputAmount.toFixed(6) });
-    } catch (error) {
-      console.error('Failed to get quote:', error);
     }
   };
 
-  const handleRetry = () => {
-    setLoading(true);
-    setError(null);
-    if (services) {
-      initializeApp();
-    }
+  const getInvestorTier = (votingPower, totalLiquidity) => {
+    if (votingPower >= 10000 && totalLiquidity >= 100000) return 'whale';
+    if (votingPower >= 5000 && totalLiquidity >= 50000) return 'major';
+    if (votingPower >= 1000 && totalLiquidity >= 10000) return 'senior';
+    if (votingPower >= 500 && totalLiquidity >= 5000) return 'standard';
+    if (votingPower >= 100) return 'junior';
+    return 'observer';
   };
 
-  useEffect(() => {
-    if (swapData.fromAmount && swapData.fromToken && swapData.toToken && services) {
-      const debounceTimer = setTimeout(getSwapQuote, 500);
-      return () => clearTimeout(debounceTimer);
+  const getUserTier = (votingPower, swapCount, daoParticipation) => {
+    if (votingPower >= 5000 && swapCount >= 100 && daoParticipation >= 20) return 'champion';
+    if (votingPower >= 2000 && swapCount >= 50 && daoParticipation >= 10) return 'advocate';
+    if (votingPower >= 1000 && swapCount >= 25 && daoParticipation >= 5) return 'active';
+    if (votingPower >= 500 && swapCount >= 10) return 'engaged';
+    if (votingPower >= 100) return 'member';
+    return 'observer';
+  };
+
+  const getNFTPowerLevel = (nftTier, daoType) => {
+    const tierMap = {
+      'Ultimate Member NFT': 5,
+      'Legendary Member NFT': 4,
+      'Super Member NFT': 3,
+      'Experienced Member NFT': 2,
+      'Enter DAO NFT': 1
+    };
+    return tierMap[nftTier] || 0;
+  };
+
+  const calculateVoteReward = (tier, daoType) => {
+    const baseReward = daoType === 'investor' ? 15 : 10;
+    const tierMultipliers = {
+      whale: 3, major: 2.5, senior: 2, standard: 1.5, junior: 1,
+      champion: 3, advocate: 2.5, active: 2, engaged: 1.5, member: 1,
+      observer: 0.5
+    };
+    return Math.floor(baseReward * (tierMultipliers[tier] || 1));
+  };
+
+  const updateEngagementMetrics = async (action) => {
+    // Update local user state with engagement tracking
+    const updates = {};
+    
+    switch (action) {
+      case 'swap':
+        updates.swapCount = (user.swapCount || 0) + 1;
+        break;
+      case 'vote':
+        updates.daoParticipation = (user.daoParticipation || 0) + 1;
+        break;
+      case 'proposal':
+        updates.daoParticipation = (user.daoParticipation || 0) + 3;
+        break;
     }
-  }, [swapData.fromAmount, swapData.fromToken, swapData.toToken, services]);
+
+    const updatedUser = { ...user, ...updates };
+    setUser(updatedUser);
+
+    // Recalculate hierarchical governance
+    updateHierarchicalGovernance(updatedUser);
+  };
+
+  const updateHierarchicalGovernance = (userData) => {
+    const investorPower = calculateHierarchicalVotingPower(userData, 'investor');
+    const userPower = calculateHierarchicalVotingPower(userData, 'user');
+
+    setHierarchicalGovernance({
+      investorTier: investorPower.tier,
+      userTier: userPower.tier,
+      investorVotingPower: investorPower.power,
+      userVotingPower: userPower.power,
+      delegatedPower: 0, // For future delegation feature
+      canCreateProposals: ['senior', 'major', 'whale', 'active', 'advocate', 'champion'].includes(investorPower.tier) || 
+                         ['active', 'advocate', 'champion'].includes(userPower.tier),
+      tierBenefits: getTierBenefits(investorPower.tier, userPower.tier)
+    });
+  };
+
+  const getTierBenefits = (investorTier, userTier) => {
+    const benefits = [];
+    
+    // Investor tier benefits
+    if (['whale', 'major'].includes(investorTier)) {
+      benefits.push('Protocol parameter control', 'Veto power on critical decisions');
+    }
+    if (['senior', 'major', 'whale'].includes(investorTier)) {
+      benefits.push('Enhanced proposal creation', 'Reward distribution influence');
+    }
+    
+    // User tier benefits  
+    if (['champion', 'advocate'].includes(userTier)) {
+      benefits.push('Feature development input', 'Community leadership role');
+    }
+    if (['active', 'advocate', 'champion'].includes(userTier)) {
+      benefits.push('Beta feature access', 'Enhanced feedback priority');
+    }
+    
+    return [...new Set(benefits)]; // Remove duplicates
+  };
 
   const renderSwapTab = () => (
     <div className="space-y-4 sm:space-y-6">
@@ -1639,7 +1761,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
                       placeholder="0.0"
                       value={liquidityData.amountB}
                       readOnly
-                      className="w-full bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2 border border-black text-black"
+                      className="w-full bg-white rounded-lg px-3 py-2 border border-black text-black"
                     />
                     <p className="text-xs text-black mt-1">
                       Price: ${(liquidityData.selectedPool.priceB || 0).toLocaleString()}
@@ -2195,130 +2317,145 @@ const sendTxForNFT = async ({ method, args = [] }) => {
 
   const renderDAOTab = () => (
     <div className="space-y-6">
-      {/* DAO Overview */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-black p-4 text-white">
-          <div className="flex items-center gap-2 mb-2">
-            <Users size={20} />
-            <h3 className="font-bold">Investor DAO</h3>
-          </div>
-          <p className="text-2xl font-bold">{user?.swiishTokens || 0}</p>
-          <div className='flex items-center justify-between gap-2'>
-            <div>
-              <p className="text-sm opacity-90">SWIISH Tokens</p>
-              <p className="text-xs opacity-75 mt-1">Liquidity providers govern yield distribution</p>
-            </div>
-            <button
-              onClick={() => alert('Investor DAO features coming soon!')}
-              className="mt-2 bg-white text-black py-1 px-3 text-xs"
-            >
-              Join Investor DAO
-            </button>
-          </div>
-        </div>
+      {/* Hierarchical DAO Overview */}
+      <div className="bg-white shadow-sm border border-black p-6">
+        <h2 className="text-xl font-bold text-black mb-4">Your DAO Hierarchy Status</h2>
         
-        <div className="bg-black p-4 text-white">
-          <div className="flex items-center gap-2 mb-2">
-            <Vote size={20} />
-            <h3 className="font-bold">User DAO</h3>
-          </div>
-          <p className="text-2xl font-bold">{user?.loyaltyPoints || 0}</p>
-          <div className='flex items-center justify-between gap-2'>
-            <div>
-              <p className="text-sm opacity-90">Loyalty Points</p>
-              <p className="text-xs opacity-75 mt-1">Power users vote on app features</p>
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="bg-black p-4 text-white">
+            <div className="flex items-center gap-2 mb-2">
+              <Users size={20} />
+              <h3 className="font-bold">Investor DAO</h3>
             </div>
-            <button
-              onClick={() => alert('User DAO features coming soon!')}
-              className="mt-2 bg-white text-black py-1 px-3 text-xs"
-            >
-              Join User DAO
-            </button>
+            <p className="text-2xl font-bold">{hierarchicalGovernance.investorVotingPower}</p>
+            <p className="text-sm opacity-90">Voting Power</p>
+            <div className="mt-2 p-2 bg-white/10 rounded">
+              <p className="text-sm font-medium">Tier: {hierarchicalGovernance.investorTier.toUpperCase()}</p>
+              <p className="text-xs opacity-75 mt-1">SWIISH: {user?.swiishTokens || 0} | Liquidity: ${(user?.totalLiquidity || 0).toLocaleString()}</p>
+            </div>
+          </div>
+          
+          <div className="bg-black p-4 text-white">
+            <div className="flex items-center gap-2 mb-2">
+              <Vote size={20} />
+              <h3 className="font-bold">User DAO</h3>
+            </div>
+            <p className="text-2xl font-bold">{hierarchicalGovernance.userVotingPower}</p>
+            <p className="text-sm opacity-90">Voting Power</p>
+            <div className="mt-2 p-2 bg-white/10 rounded">
+              <p className="text-sm font-medium">Tier: {hierarchicalGovernance.userTier.toUpperCase()}</p>
+              <p className="text-xs opacity-75 mt-1">Points: {user?.loyaltyPoints || 0} | Swaps: {user?.swapCount || 0}</p>
+            </div>
           </div>
         </div>
+
+        {/* Tier Benefits */}
+        {hierarchicalGovernance.tierBenefits.length > 0 && (
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <h4 className="font-medium text-black mb-2">Your Tier Benefits:</h4>
+            <ul className="text-sm text-black space-y-1">
+              {hierarchicalGovernance.tierBenefits.map((benefit, idx) => (
+                <li key={idx} className="flex items-center gap-2">
+                  <div className="w-1 h-1 bg-blue-500 rounded-full"></div>
+                  {benefit}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
-      {/* Active Proposals */}
+      {/* Active Proposals with Hierarchical Voting */}
       <div className="bg-white shadow-sm border border-black">
         <div className="p-6 border-b border-black">
-          <h2 className="text-xl font-bold text-black">Active Governance Proposals</h2>
-          <p className="text-black text-sm mt-1">Shape the future of SWIISH</p>
+          <h2 className="text-xl font-bold text-black">Hierarchical Governance Proposals</h2>
+          <p className="text-black text-sm mt-1">Your voting power is based on your tier and stake</p>
         </div>
 
         <div className="divide-y divide-black">
-          {proposals && proposals.length > 0 ? proposals.map((proposal) => (
-            <div key={proposal.id} className="p-6">
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex-1">
-                  <h3 className="font-semibold text-black mb-2">{proposal.title}</h3>
-                  <p className="text-sm text-black mb-3">{proposal.description}</p>
-                  
-                  <div className="flex gap-2 mb-2">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+          {proposals && proposals.length > 0 ? proposals.map((proposal) => {
+            const investorPower = calculateHierarchicalVotingPower(user, 'investor');
+            const userPower = calculateHierarchicalVotingPower(user, 'user');
+            const relevantPower = proposal.dao === 'investor' ? investorPower : userPower;
+            
+            return (
+              <div key={proposal.id} className="p-6">
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-black mb-2">{proposal.title}</h3>
+                    <p className="text-sm text-black mb-3">{proposal.description}</p>
+                    
+                    <div className="flex gap-2 mb-2">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         proposal.dao === 'investor'
-                          ? 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300'
-                          : 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
-                      }`}
-                    >
-                      {proposal.dao === 'investor' ? 'Investor DAO' : 'User DAO'}
-                    </span>
-                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300">
-                      {proposal.status}
-                    </span>
-                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                      Requires {proposal.requiredTokens} {proposal.dao === 'investor' ? 'SWIISH' : 'points'}
-                    </span>
-                  </div>
-                  
-                  <div className="text-xs text-black">
-                    Ends: {new Date(proposal.endsAt).toLocaleDateString()}
-                  </div>
-                </div>
-                
-                <div className="text-right ml-4">
-                  <p className="font-semibold text-black">{proposal.votes}</p>
-                  <p className="text-sm text-black">votes</p>
-                </div>
-              </div>
-
-              {proposal.status === 'active' && (
-                <>
-                  {((proposal.dao === 'investor' && (user?.swiishTokens || 0) < proposal.requiredTokens) ||
-                    (proposal.dao === 'user' && (user?.loyaltyPoints || 0) < proposal.requiredTokens)) && (
-                    <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 mb-3">
-                      <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                        You need {proposal.requiredTokens - (proposal.dao === 'investor' ? user?.swiishTokens || 0 : user?.loyaltyPoints || 0)} more {proposal.dao === 'investor' ? 'SWIISH tokens' : 'loyalty points'} to vote on this proposal.
+                          ? 'bg-purple-100 text-purple-700'
+                          : 'bg-blue-100 text-blue-700'
+                      }`}>
+                        {proposal.dao === 'investor' ? 'Investor DAO' : 'User DAO'}
+                      </span>
+                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                        {proposal.status}
+                      </span>
+                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                        Min Power: {proposal.requiredTokens}
+                      </span>
+                    </div>
+                    
+                    {/* Voting Power Breakdown */}
+                    <div className="bg-gray-50 p-3 rounded-lg mb-3">
+                      <p className="text-xs font-medium text-black mb-1">Your Voting Status:</p>
+                      <p className="text-sm text-black">
+                        Tier: <span className="font-bold">{relevantPower.tier.toUpperCase()}</span> | 
+                        Power: <span className="font-bold">{relevantPower.power}</span>
+                        {relevantPower.canVote ? 
+                          <span className="text-green-600 ml-2">✓ Can Vote</span> : 
+                          <span className="text-red-600 ml-2">✗ Cannot Vote</span>
+                        }
                       </p>
                     </div>
-                  )}
-                  
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleVote(proposal.id, 'yes', proposal.dao)}
-                      disabled={
-                        (proposal.dao === 'investor' && (user?.swiishTokens || 0) < proposal.requiredTokens) ||
-                        (proposal.dao === 'user' && (user?.loyaltyPoints || 0) < proposal.requiredTokens)
-                      }
-                      className="flex-1 bg-black text-white py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Vote Yes
-                    </button>
-                    <button
-                      onClick={() => handleVote(proposal.id, 'no', proposal.dao)}
-                      disabled={
-                        (proposal.dao === 'investor' && (user?.swiishTokens || 0) < proposal.requiredTokens) ||
-                        (proposal.dao === 'user' && (user?.loyaltyPoints || 0) < proposal.requiredTokens)
-                      }
-                      className="flex-1 bg-black text-white py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Vote No
-                    </button>
+                    
+                    <div className="text-xs text-black">
+                      Ends: {new Date(proposal.endsAt).toLocaleDateString()}
+                    </div>
                   </div>
-                </>
-              )}
-            </div>
-          )) : (
+                  
+                  <div className="text-right ml-4">
+                    <p className="font-semibold text-black">{proposal.votes}</p>
+                    <p className="text-sm text-black">total power</p>
+                  </div>
+                </div>
+
+                {proposal.status === 'active' && (
+                  <>
+                    {!relevantPower.canVote && (
+                      <div className="bg-yellow-50 rounded-lg p-3 mb-3">
+                        <p className="text-sm text-yellow-700">
+                          {relevantPower.requirements}
+                        </p>
+                      </div>
+                    )}
+                    
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleVote(proposal.id, 'yes', proposal.dao)}
+                        disabled={!relevantPower.canVote}
+                        className="flex-1 bg-black text-white py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Vote Yes (Power: {relevantPower.power})
+                      </button>
+                      <button
+                        onClick={() => handleVote(proposal.id, 'no', proposal.dao)}
+                        disabled={!relevantPower.canVote}
+                        className="flex-1 bg-black text-white py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Vote No (Power: {relevantPower.power})
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            );
+          }) : (
             <div className="text-center py-8">
               <p className="text-black">Loading DAO proposals...</p>
             </div>
@@ -2380,14 +2517,38 @@ const sendTxForNFT = async ({ method, args = [] }) => {
   const TabButton = ({ id, icon: Icon, label, isActive, onClick }) => (
     <button
       onClick={() => onClick(id)}
-      className={`flex flex-col items-center p-2 sm:p-3 ${
+      className={`flex flex-col items-center p-2 sm:p-3 swiish-tab-button ${
         isActive
-          ? 'bg-black text-white shadow-lg'
-          : 'bg-white text-black border border-black'
+          ? 'bg-black text-white shadow-lg active'
+          : 'bg-white text-black inactive'
       }`}
+      style={{
+        backgroundColor: isActive ? '#000000 !important' : '#ffffff !important',
+        color: isActive ? '#ffffff !important' : '#000000 !important',
+        border: 'none'
+      }}
+      onMouseEnter={(e) => {
+        e.target.style.backgroundColor = isActive ? '#000000' : '#ffffff';
+        e.target.style.color = isActive ? '#ffffff' : '#000000';
+        e.target.style.border = 'none';
+      }}
+      onMouseLeave={(e) => {
+        e.target.style.backgroundColor = isActive ? '#000000' : '#ffffff';
+        e.target.style.color = isActive ? '#ffffff' : '#000000';
+        e.target.style.border = 'none';
+      }}
     >
-      <Icon size={18} className="sm:w-5 sm:h-5" />
-      <span className="text-xs mt-1 font-medium">{label}</span>
+      <Icon 
+        size={18} 
+        className="sm:w-5 sm:h-5"
+        style={{ color: isActive ? '#ffffff !important' : '#000000 !important' }}
+      />
+      <span 
+        className="text-xs mt-1 font-medium"
+        style={{ color: isActive ? '#ffffff !important' : '#000000 !important' }}
+      >
+        {label}
+      </span>
     </button>
   );
 
@@ -2406,17 +2567,56 @@ const sendTxForNFT = async ({ method, args = [] }) => {
   );
 
   return (
-    <div className="min-h-screen bg-white transition-colors">
-      <div className="bg-black text-white p-4 sticky top-0 z-10">
+    <div className="min-h-screen bg-white">
+      <div 
+        className="bg-black text-white p-4 sticky top-0 z-10 swiish-header"
+        style={{
+          backgroundColor: '#000000 !important',
+          color: '#ffffff !important'
+        }}
+        onMouseEnter={(e) => {
+          e.target.style.backgroundColor = '#000000';
+          e.target.style.color = '#ffffff';
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.backgroundColor = '#000000';
+          e.target.style.color = '#ffffff';
+        }}
+      >
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-white">SWIISH</h1>
-            <p className="text-white text-xs sm:text-sm">DeFi in Telegram</p>
+            <h1 
+              className="text-xl sm:text-2xl font-bold text-white"
+              style={{ color: '#ffffff !important' }}
+              onMouseEnter={(e) => e.target.style.color = '#ffffff'}
+              onMouseLeave={(e) => e.target.style.color = '#ffffff'}
+            >
+              SWIISH
+            </h1>
+            <p 
+              className="text-white text-xs sm:text-sm"
+              style={{ color: '#ffffff !important' }}
+              onMouseEnter={(e) => e.target.style.color = '#ffffff'}
+              onMouseLeave={(e) => e.target.style.color = '#ffffff'}
+            >
+              DeFi in Telegram
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1 sm:gap-2">
-              <Wallet size={16} className="sm:w-5 sm:h-5 text-white" />
-              <span className="font-medium text-sm sm:text-base text-white">@{user?.username}</span>
+              <Wallet 
+                size={16} 
+                className="sm:w-5 sm:h-5 text-white"
+                style={{ color: '#ffffff !important' }}
+              />
+              <span 
+                className="font-medium text-sm sm:text-base text-white"
+                style={{ color: '#ffffff !important' }}
+                onMouseEnter={(e) => e.target.style.color = '#ffffff'}
+                onMouseLeave={(e) => e.target.style.color = '#ffffff'}
+              >
+                @{user?.username}
+              </span>
             </div>
           </div>
         </div>
@@ -2430,7 +2630,7 @@ const sendTxForNFT = async ({ method, args = [] }) => {
         {activeTab === 'profile' && renderProfileTab()}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-black p-2 sm:p-4">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-black p-2 sm:p-4 swiish-tab-nav">
         <div className="grid grid-cols-5 gap-1 sm:gap-2 max-w-md mx-auto">
           <TabButton
             id="swap"
