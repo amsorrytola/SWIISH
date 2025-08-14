@@ -549,6 +549,9 @@ const sendTxForNFT = async ({ method, args = [] }) => {
         votingPower: enhancedUser.swiishTokens + (enhancedUser.loyaltyPoints * 0.1)
       });
       
+      // Initialize hierarchical governance
+      await updateHierarchicalGovernance(enhancedUser);
+      
       console.log('User authenticated successfully:', enhancedUser);
     } catch (error) {
       console.error('Authentication failed:', error);
@@ -1459,12 +1462,12 @@ const sendTxForNFT = async ({ method, args = [] }) => {
     setUser(updatedUser);
 
     // Recalculate hierarchical governance
-    updateHierarchicalGovernance(updatedUser);
+    await updateHierarchicalGovernance(updatedUser);
   };
 
-  const updateHierarchicalGovernance = (userData) => {
-    const investorPower = calculateHierarchicalVotingPower(userData, 'investor');
-    const userPower = calculateHierarchicalVotingPower(userData, 'user');
+  const updateHierarchicalGovernance = async (userData) => {
+    const investorPower = await calculateHierarchicalVotingPower(userData, 'investor');
+    const userPower = await calculateHierarchicalVotingPower(userData, 'user');
 
     setHierarchicalGovernance({
       investorTier: investorPower.tier,
@@ -2374,8 +2377,21 @@ const sendTxForNFT = async ({ method, args = [] }) => {
 
         <div className="divide-y divide-black">
           {proposals && proposals.length > 0 ? proposals.map((proposal) => {
-            const investorPower = calculateHierarchicalVotingPower(user, 'investor');
-            const userPower = calculateHierarchicalVotingPower(user, 'user');
+            // Use stored hierarchical governance data instead of calculating async
+            const investorPower = {
+              power: hierarchicalGovernance.investorVotingPower || 0,
+              tier: hierarchicalGovernance.investorTier || 'observer',
+              canVote: ['junior', 'standard', 'senior', 'major', 'whale'].includes(hierarchicalGovernance.investorTier || 'observer'),
+              requirements: (['junior', 'standard', 'senior', 'major', 'whale'].includes(hierarchicalGovernance.investorTier || 'observer')) ? '' : 'Minimum 100 voting power required'
+            };
+            
+            const userPower = {
+              power: hierarchicalGovernance.userVotingPower || 0,
+              tier: hierarchicalGovernance.userTier || 'observer',
+              canVote: ['member', 'engaged', 'active', 'advocate', 'champion'].includes(hierarchicalGovernance.userTier || 'observer'),
+              requirements: (['member', 'engaged', 'active', 'advocate', 'champion'].includes(hierarchicalGovernance.userTier || 'observer')) ? '' : 'Minimum 100 voting power required'
+            };
+            
             const relevantPower = proposal.dao === 'investor' ? investorPower : userPower;
             
             return (
