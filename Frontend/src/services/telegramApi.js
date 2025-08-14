@@ -231,6 +231,29 @@ class TelegramApiService {
       body: JSON.stringify(stakingData),
     });
   }
+
+  // Hierarchical DAO methods
+  async getHierarchicalVotingPower(telegramId, daoType) {
+    return this.request(`/dao/hierarchical/voting-power/${daoType}/${telegramId}`);
+  }
+
+  async submitHierarchicalVote(voteData) {
+    return this.request('/dao/hierarchical/vote', {
+      method: 'POST',
+      body: JSON.stringify(voteData),
+    });
+  }
+
+  async delegateVotingPower(delegationData) {
+    return this.request('/dao/hierarchical/delegate', {
+      method: 'POST',
+      body: JSON.stringify(delegationData),
+    });
+  }
+
+  async getGovernanceStats(telegramId) {
+    return this.request(`/dao/hierarchical/stats/${telegramId}`);
+  }
 }
 
 export default new TelegramApiService();
